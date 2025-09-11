@@ -61,6 +61,9 @@ export default function AdminPage() {
     price: 0,
     category: '',
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const { toast } = useToast();
 
   const fetchProducts = async () => {
@@ -97,12 +100,16 @@ export default function AdminPage() {
       price: 0,
       category: '',
     });
+    setImagePreview(product?.image ?? null);
+    setImageFile(null);
     setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setSelectedProduct(null);
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,27 +117,55 @@ export default function AdminPage() {
     setFormData(prev => ({ ...prev, [id]: id === 'price' ? parseFloat(value) || 0 : value }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedProduct && !imageFile) {
+      toast({
+        variant: "destructive",
+        title: "Image required",
+        description: "Please select an image for the new product.",
+      });
+      return;
+    }
     setIsSubmitting(true);
     
-    
+    let imageUrl = selectedProduct?.image ?? '';
+
+    if (imageFile) {
+        // In a real app, you would upload to a service like Firebase Storage.
+        // For this demo, we'll convert to a base64 Data URL.
+        const reader = new FileReader();
+        imageUrl = await new Promise((resolve) => {
+             reader.onloadend = () => {
+                resolve(reader.result as string);
+             };
+             reader.readAsDataURL(imageFile);
+        });
+    }
 
     try {
       if (selectedProduct) {
         // Edit product
-        const productData: Partial<Omit<Product, 'id'>> = { ...formData };
-        if (formData.name !== selectedProduct.name) {
-            productData.image = `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`;
-            productData.imageHint = formData.category.toLowerCase();
-        }
+        const productData: Partial<Omit<Product, 'id'>> = { ...formData, image: imageUrl, imageHint: formData.category.toLowerCase() };
         await updateProduct(selectedProduct.id, productData);
         toast({ title: "Product updated successfully!" });
       } else {
         // Add new product
          const productData = {
             ...formData,
-            image: `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`,
+            image: imageUrl,
             imageHint: formData.category.toLowerCase(),
         };
         await addProduct(productData);
@@ -266,6 +301,17 @@ export default function AdminPage() {
           </DialogHeader>
           <form onSubmit={handleFormSubmit}>
             <div className="grid gap-4 py-4">
+               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="image" className="text-right">Image</Label>
+                <div className="col-span-3">
+                  <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="col-span-3" />
+                  {imagePreview && (
+                      <div className="mt-4 relative w-24 h-24">
+                          <Image src={imagePreview} alt="Image preview" layout="fill" className="rounded-md object-cover" />
+                      </div>
+                  )}
+                </div>
+              </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">Name</Label>
                 <Input id="name" value={formData.name} onChange={handleFormChange} className="col-span-3" required />
