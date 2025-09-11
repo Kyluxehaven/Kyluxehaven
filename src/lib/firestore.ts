@@ -131,15 +131,13 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 's
     return { id: newOrderSnap.id, ...newOrderSnap.data() } as Order;
 }
 
-export async function uploadPaymentProof(file: File): Promise<string> {
-  const uniqueId = uuidv4();
-  const storageRef = ref(storage, `payment_proofs/${uniqueId}-${file.name}`);
-  const snapshot = await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(snapshot.ref);
-  return downloadURL;
+// This function now just returns the string passed to it.
+// The conversion from File to Data URL will happen in the server action.
+export async function uploadPaymentProof(proofAsDataUrl: string): Promise<string> {
+  return proofAsDataUrl;
 }
 
-export async function updateOrder(id: string, data: Partial<Order>): Promise<void> {
+export async function updateOrder(id: string, data: { paymentProofUrl: string }): Promise<void> {
     const orderDoc = doc(db, 'orders', id);
     await updateDoc(orderDoc, data);
 }

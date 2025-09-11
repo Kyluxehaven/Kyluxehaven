@@ -25,5 +25,5 @@ export interface Order {
     totalAmount: number;
     status: OrderStatus;
     createdAt: Timestamp;
-    paymentProofUrl?: string;
+    paymentProofUrl?: string; // This can now be a long Data URL string
 }
