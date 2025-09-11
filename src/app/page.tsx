@@ -4,6 +4,7 @@ import ProductCard from '@/components/product-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Product } from '@/lib/types';
+import { Gem, Truck, ShieldCheck } from 'lucide-react';
 
 export default async function Home() {
   const products: Product[] = await getProducts();
@@ -52,6 +53,35 @@ export default async function Home() {
             <Button asChild size="lg" variant="outline">
               <Link href="/shop">View All Products</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      <section id="why-us" className="bg-secondary/50 py-16 sm:py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-headline font-bold text-center mb-12">Why KyLuxeHaven?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground mb-4">
+                <Gem className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Quality Craftsmanship</h3>
+              <p className="text-muted-foreground">We source only the finest materials for accessories that last.</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground mb-4">
+                <Truck className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Fast Shipping</h3>
+              <p className="text-muted-foreground">Get your new favorite accessories delivered to your door quickly.</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground mb-4">
+                <ShieldCheck className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Secure Shopping</h3>
+              <p className="text-muted-foreground">Your privacy and security are our top priority. Shop with confidence.</p>
+            </div>
           </div>
         </div>
       </section>
