@@ -33,7 +33,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-300 hover:scale-105"
+            className="object-cover transition-transform duration-300"
             data-ai-hint={product.imageHint}
           />
         </div>
@@ -51,5 +51,3 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
-
-    
