@@ -69,6 +69,7 @@ export default function AdminPage() {
       const productsFromDb = await getProducts();
       setProducts(productsFromDb);
     } catch (error) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: "Error fetching products",
@@ -113,19 +114,25 @@ export default function AdminPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const productData = {
-        ...formData,
-        image: `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`,
-        imageHint: formData.category.toLowerCase(),
-    };
+    
 
     try {
       if (selectedProduct) {
         // Edit product
+        const productData: Partial<Omit<Product, 'id'>> = { ...formData };
+        if (formData.name !== selectedProduct.name) {
+            productData.image = `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`;
+            productData.imageHint = formData.category.toLowerCase();
+        }
         await updateProduct(selectedProduct.id, productData);
         toast({ title: "Product updated successfully!" });
       } else {
         // Add new product
+         const productData = {
+            ...formData,
+            image: `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`,
+            imageHint: formData.category.toLowerCase(),
+        };
         await addProduct(productData);
         toast({ title: "Product added successfully!" });
       }
