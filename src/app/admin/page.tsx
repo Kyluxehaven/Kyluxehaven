@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -13,19 +15,114 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
-import { products } from "@/lib/products"
+import { products as initialProducts } from "@/lib/products"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { useState } from "react"
+import type { Product } from "@/lib/types"
 
 export default function AdminPage() {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [formData, setFormData] = useState<Omit<Product, 'id' | 'image' | 'imageHint'>>({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+  });
+
+  const handleOpenForm = (product: Product | null) => {
+    setSelectedProduct(product);
+    setFormData(product ? {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+    } : {
+      name: '',
+      description: '',
+      price: 0,
+      category: '',
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: id === 'price' ? parseFloat(value) || 0 : value }));
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedProduct) {
+      // Edit product
+      const updatedProducts = products.map(p =>
+        p.id === selectedProduct.id ? { ...p, ...formData } : p
+      );
+      setProducts(updatedProducts);
+    } else {
+      // Add new product
+      const newProduct: Product = {
+        id: (products.length + 1).toString(),
+        ...formData,
+        image: `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`,
+        imageHint: formData.category.toLowerCase(),
+      };
+      setProducts([...products, newProduct]);
+    }
+    handleCloseForm();
+  };
+
+  const openDeleteDialog = (product: Product) => {
+    setProductToDelete(product);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (productToDelete) {
+      setProducts(products.filter(p => p.id !== productToDelete.id));
+      setIsDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl sm:text-4xl font-headline font-bold">Product Management</h1>
-        <Button>
+        <Button onClick={() => handleOpenForm(null)}>
           <PlusCircle className="mr-2 h-5 w-5" />
           Add Product
         </Button>
@@ -75,8 +172,13 @@ export default function AdminPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive focus:text-destructive-foreground focus:bg-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenForm(product)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
+                          onClick={() => openDeleteDialog(product)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -86,9 +188,57 @@ export default function AdminPage() {
           </Table>
         </CardContent>
       </Card>
-      <p className="text-sm text-muted-foreground mt-4">
-        Note: This is a static UI demonstration. Add, Edit, and Delete functionalities are not implemented.
-      </p>
+      
+      {/* Add/Edit Product Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{selectedProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <Input id="name" value={formData.name} onChange={handleFormChange} className="col-span-3" required />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">Description</Label>
+                <Input id="description" value={formData.description} onChange={handleFormChange} className="col-span-3" required />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">Price</Label>
+                <Input id="price" type="number" step="0.01" value={formData.price} onChange={handleFormChange} className="col-span-3" required />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="category" className="text-right">Category</Label>
+                <Input id="category" value={formData.category} onChange={handleFormChange} className="col-span-3" required />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">{selectedProduct ? 'Save Changes' : 'Add Product'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the product from the list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
