@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Banknote, User, Hash, UploadCloud, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,9 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/hooks/use-cart';
 import { confirmPayment } from '../checkout/actions';
 
-export default function PaymentPage() {
+function PaymentPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { toast } = useToast();
   const { clearCart } = useCart();
   const orderId = searchParams.get('orderId');
@@ -182,4 +181,13 @@ export default function PaymentPage() {
       </Card>
     </div>
   );
+}
+
+
+export default function PaymentPage() {
+    return (
+        <Suspense fallback={<div className="flex h-[50vh] items-center justify-center"><Loader2 className="h-16 w-16 animate-spin text-primary" /></div>}>
+            <PaymentPageContent />
+        </Suspense>
+    );
 }
