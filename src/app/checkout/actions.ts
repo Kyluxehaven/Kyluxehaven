@@ -1,3 +1,4 @@
+
 "use server";
 
 import { redirect } from 'next/navigation';
@@ -13,25 +14,25 @@ interface OrderData {
 }
 
 export async function placeOrder(orderData: OrderData) {
+  let newOrder;
   try {
-    const newOrder = await createOrder({
+    newOrder = await createOrder({
       userId: orderData.userId,
       customerName: orderData.customerName,
       shippingAddress: orderData.shippingAddress,
       orderItems: orderData.cartItems,
       totalAmount: orderData.cartTotal,
     });
-
-    // Redirect to the payment page with the new order's ID
-    redirect(`/payment?orderId=${newOrder.id}`);
   } catch (error) {
     console.error('Failed to create order:', error);
-    // The redirect in a try-catch block requires this return type.
-    // In case of an error, we can return a message.
+    // In case of an error, we return a message.
     return {
       error: 'There was a problem creating your order. Please try again.',
     };
   }
+
+  // Redirect to the payment page with the new order's ID on success
+  redirect(`/payment?orderId=${newOrder.id}`);
 }
 
 
