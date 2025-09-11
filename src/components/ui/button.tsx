@@ -44,7 +44,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     
-    // Check if there are multiple children to apply gap
     const hasIconAndText = React.Children.count(children) > 1;
 
     return (
