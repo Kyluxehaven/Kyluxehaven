@@ -74,7 +74,11 @@ const summarizeOrderFlow = ai.defineFlow(
     outputSchema: SummarizeOrderOutputSchema,
   },
   async input => {
-    const response = await summarizeOrderPrompt(input);
-    return response.text;
+    const result = await summarizeOrderPrompt(input);
+    // The result object contains the generated text. We must explicitly return it.
+    // The 'text' property is a getter function in some versions, a property in others.
+    // Calling it as a function is safer. If it's just a property, it should still work.
+    // If it is genkit 1.x, it's a property.
+    return result.text;
   }
 );
