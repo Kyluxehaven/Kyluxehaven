@@ -361,7 +361,6 @@ function AdminDashboard() {
 }
 
 const ADMIN_UID = "O0dGhZynNgYa6eeZ3r5UDQvRU6h2";
-const ADMIN_EMAIL = "kyluxehaven@outloo.com";
 
 export default function AdminPage() {
     const { user, loading } = useAuth();
@@ -379,7 +378,7 @@ export default function AdminPage() {
             return;
         }
 
-        const authorized = user.uid === ADMIN_UID && user.email === ADMIN_EMAIL;
+        const authorized = user.uid === ADMIN_UID;
         setIsAuthorized(authorized);
 
         if (!authorized) {
@@ -414,5 +413,3 @@ export default function AdminPage() {
 
     return <AdminDashboard />;
 }
-
-    
