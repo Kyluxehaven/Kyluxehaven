@@ -129,7 +129,7 @@ export default function AdminPage() {
     }
   };
 
- const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct && !imageFile) {
         toast({
@@ -141,28 +141,31 @@ export default function AdminPage() {
     }
     setIsSubmitting(true);
     
-    let imageUrl = selectedProduct?.image ?? '';
-
     try {
+        let imageUrl = selectedProduct?.image ?? '';
         if (imageFile) {
             imageUrl = await uploadImage(imageFile);
         }
 
         if (selectedProduct) {
             // Editing an existing product
-             const productData: Partial<Omit<Product, 'id'>> = {
-                ...formData,
+            const productData: Partial<Omit<Product, 'id'>> = {
+                name: formData.name,
+                description: formData.description,
+                price: formData.price,
+                category: formData.category,
+                image: imageUrl, // Always include the image URL
             };
-            // Only update the image if a new one was uploaded
-            if (imageFile) {
-                productData.image = imageUrl;
-            }
+            
             await updateProduct(selectedProduct.id, productData);
             toast({ title: "Product updated successfully!" });
         } else {
             // Adding a new product
             const productData: Omit<Product, 'id'> = {
-                ...formData,
+                name: formData.name,
+                description: formData.description,
+                price: formData.price,
+                category: formData.category,
                 image: imageUrl,
                 imageHint: formData.category.toLowerCase(),
             };
@@ -170,10 +173,10 @@ export default function AdminPage() {
             toast({ title: "Product added successfully!" });
         }
         
-        fetchProducts(); // Refresh data
+        await fetchProducts(); // Refresh data
         handleCloseForm();
     } catch (error) {
-        console.error(error);
+        console.error("Error saving product:", error);
         toast({
             variant: "destructive",
             title: "An error occurred",
