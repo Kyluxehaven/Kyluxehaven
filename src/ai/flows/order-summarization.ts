@@ -75,7 +75,6 @@ const summarizeOrderFlow = ai.defineFlow(
   },
   async input => {
     const result = await summarizeOrderPrompt(input);
-    // The result from a prompt is an object, so we need to extract the text.
     return result.text;
   }
 );
