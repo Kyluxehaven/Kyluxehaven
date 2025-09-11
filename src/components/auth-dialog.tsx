@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Lock, Mail, Loader2 } from 'lucide-react';
+import { Lock, Mail, Loader2, Phone } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { signInWithEmail, signUpWithEmail } from '@/lib/auth';
 
 const signUpSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
+  phone: z.string().min(10, 'Please enter a valid phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 type SignUpFormValues = z.infer<typeof signUpSchema>;
@@ -37,7 +38,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   
   const signUpForm = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: '', phone: '', password: '' },
   });
 
   const signInForm = useForm<SignInFormValues>({
@@ -137,6 +138,18 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                         <Input placeholder="user@example.com" {...field} className="pl-10" />
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={signUpForm.control} name="phone" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input placeholder="+234 801 234 5678" {...field} className="pl-10" />
                                     </div>
                                 </FormControl>
                                 <FormMessage />
