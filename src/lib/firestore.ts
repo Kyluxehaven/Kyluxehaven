@@ -116,10 +116,3 @@ export async function deleteProduct(id: string): Promise<void> {
   const productDoc = doc(db, 'products', id);
   await deleteDoc(productDoc);
 }
-
-export async function uploadImage(file: File): Promise<string> {
-    const storageRef = ref(storage, `products/${Date.now()}-${file.name}`);
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
-}

@@ -43,7 +43,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from "react"
 import type { Product } from "@/lib/types"
-import { getProducts, addProduct, updateProduct, deleteProduct, uploadImage } from "@/lib/firestore"
+import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -55,14 +55,14 @@ export default function AdminPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [formData, setFormData] = useState<Omit<Product, 'id' | 'image' | 'imageHint'>>({
+  const [formData, setFormData] = useState<Omit<Product, 'id'>>({
     name: '',
     description: '',
     price: 0,
     category: '',
+    image: '',
+    imageHint: '',
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -89,27 +89,20 @@ export default function AdminPage() {
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
-    setFormData(product ? {
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-    } : {
+    setFormData(product ? { ...product } : {
       name: '',
       description: '',
       price: 0,
       category: '',
+      image: '',
+      imageHint: '',
     });
-    setImagePreview(product?.image ?? null);
-    setImageFile(null);
     setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setSelectedProduct(null);
-    setImageFile(null);
-    setImagePreview(null);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,58 +110,34 @@ export default function AdminPage() {
     setFormData(prev => ({ ...prev, [id]: id === 'price' ? parseFloat(value) || 0 : value }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProduct && !imageFile) {
+    if (!formData.image) {
         toast({
             variant: "destructive",
-            title: "Image required",
-            description: "Please select an image for the new product.",
+            title: "Image address required",
+            description: "Please enter an image URL.",
         });
         return;
     }
     setIsSubmitting(true);
     
     try {
-        let imageUrl = selectedProduct?.image ?? '';
-        if (imageFile) {
-            imageUrl = await uploadImage(imageFile);
-        }
+        const productData = {
+          name: formData.name,
+          description: formData.description,
+          price: formData.price,
+          category: formData.category,
+          image: formData.image,
+          imageHint: formData.category.toLowerCase(),
+        };
 
         if (selectedProduct) {
             // Editing an existing product
-            const productData: Partial<Omit<Product, 'id'>> = {
-                name: formData.name,
-                description: formData.description,
-                price: formData.price,
-                category: formData.category,
-                image: imageUrl, // Always include the image URL
-            };
-            
             await updateProduct(selectedProduct.id, productData);
             toast({ title: "Product updated successfully!" });
         } else {
             // Adding a new product
-            const productData: Omit<Product, 'id'> = {
-                name: formData.name,
-                description: formData.description,
-                price: formData.price,
-                category: formData.category,
-                image: imageUrl,
-                imageHint: formData.category.toLowerCase(),
-            };
             await addProduct(productData);
             toast({ title: "Product added successfully!" });
         }
@@ -186,7 +155,6 @@ export default function AdminPage() {
         setIsSubmitting(false);
     }
 };
-
 
   const openDeleteDialog = (product: Product) => {
     setProductToDelete(product);
@@ -305,17 +273,6 @@ export default function AdminPage() {
           </DialogHeader>
           <form onSubmit={handleFormSubmit}>
             <div className="grid gap-4 py-4">
-               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="image" className="text-right">Image</Label>
-                <div className="col-span-3">
-                  <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="col-span-3" />
-                  {imagePreview && (
-                      <div className="mt-4 relative w-24 h-24">
-                          <Image src={imagePreview} alt="Image preview" fill className="rounded-md object-cover" />
-                      </div>
-                  )}
-                </div>
-              </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">Name</Label>
                 <Input id="name" value={formData.name} onChange={handleFormChange} className="col-span-3" required />
@@ -332,6 +289,20 @@ export default function AdminPage() {
                 <Label htmlFor="category" className="text-right">Category</Label>
                 <Input id="category" value={formData.category} onChange={handleFormChange} className="col-span-3" required />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="image" className="text-right">Image URL</Label>
+                <Input id="image" placeholder="https://example.com/image.png" value={formData.image} onChange={handleFormChange} className="col-span-3" required />
+              </div>
+              {formData.image && (
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Preview</Label>
+                    <div className="col-span-3">
+                      <div className="mt-2 relative w-24 h-24">
+                          <Image src={formData.image} alt="Image preview" fill className="rounded-md object-cover" />
+                      </div>
+                    </div>
+                  </div>
+              )}
             </div>
             <DialogFooter>
               <DialogClose asChild>
