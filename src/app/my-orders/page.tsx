@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -54,7 +55,8 @@ export default function MyOrdersPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
-  async function fetchOrders() {
+  useEffect(() => {
+    async function fetchOrders() {
       if (!user) return;
       setIsLoading(true);
       try {
@@ -72,16 +74,14 @@ export default function MyOrdersPage() {
       }
     }
 
-  useEffect(() => {
     if (authLoading) return;
 
     if (!user) {
       router.push("/login");
-      return;
+    } else {
+      fetchOrders();
     }
-    
-    fetchOrders();
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, toast]);
 
   const openDeleteDialog = (order: Order) => {
     setOrderToDelete(order);
@@ -90,10 +90,12 @@ export default function MyOrdersPage() {
 
   const handleDeleteConfirm = async () => {
     if (orderToDelete) {
+        setIsLoading(true);
       try {
         await deleteOrder(orderToDelete.id);
         toast({ title: "Order deleted successfully" });
-        fetchOrders(); // Refresh the list
+        const updatedOrders = orders.filter(o => o.id !== orderToDelete.id);
+        setOrders(updatedOrders);
       } catch (error) {
         toast({
           variant: "destructive",
@@ -103,6 +105,7 @@ export default function MyOrdersPage() {
       } finally {
         setIsDeleteDialogOpen(false);
         setOrderToDelete(null);
+        setIsLoading(false);
       }
     }
   };

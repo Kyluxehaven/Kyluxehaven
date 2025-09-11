@@ -70,16 +70,15 @@ function PaymentPageContent() {
         const formData = new FormData();
         formData.append('paymentProof', paymentProof);
         
-        await confirmPayment(orderId, formData);
+        const result = await confirmPayment(orderId, formData);
         
-        // On success, the server action will redirect.
-        // We only need to handle the case where it throws an error.
+        if (result?.error) {
+            throw new Error(result.error);
+        }
+        
         clearCart();
 
     } catch (error: any) {
-        // The `redirect()` function in a server action throws a special `NEXT_REDIRECT` error.
-        // We need to catch it and re-throw it to allow the redirect to happen,
-        // otherwise it will be treated as a real error.
         if (error.digest?.startsWith('NEXT_REDIRECT')) {
           throw error;
         }
@@ -88,7 +87,7 @@ function PaymentPageContent() {
         toast({
             variant: "destructive",
             title: "Upload Failed",
-            description: "Could not submit your payment proof. Please try again."
+            description: error.message || "Could not submit your payment proof. Please try again."
         });
         setIsSubmitting(false);
     }

@@ -49,14 +49,15 @@ export default function CheckoutPage() {
   });
   
   useEffect(() => {
-    // Prefill name from user profile if available
     if (user) {
       form.setValue('name', user.displayName || '');
     }
   }, [user, form]);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authLoading) return; 
+
+    if (!user) {
       setIsAuthDialogOpen(true);
     }
     if (cartItems.length === 0 && !isSubmitting) {
@@ -95,7 +96,7 @@ export default function CheckoutPage() {
         }
     } catch (error: any) {
         if (error.digest?.startsWith('NEXT_REDIRECT')) {
-            throw error; // Let Next.js handle the redirect
+            throw error;
         }
         console.error("Failed to place order:", error);
         toast({
@@ -107,7 +108,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (authLoading || cartItems.length === 0) {
+  if (authLoading || (!user && !authLoading && cartItems.length > 0)) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
@@ -124,7 +125,6 @@ export default function CheckoutPage() {
         </div>
         <AuthDialog open={isAuthDialogOpen} onOpenChange={(open) => {
             if (!open) {
-                // If the user closes the dialog without logging in, redirect them.
                 if (!user) router.push('/');
                 else setIsAuthDialogOpen(false);
             } else {
