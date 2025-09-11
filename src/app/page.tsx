@@ -1,10 +1,12 @@
 import Image from 'next/image';
-import { initialProducts as products } from '@/lib/products';
+import { getProducts } from '@/lib/firestore';
 import ProductCard from '@/components/product-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Product } from '@/lib/types';
 
-export default function Home() {
+export default async function Home() {
+  const products: Product[] = await getProducts();
   return (
     <div>
       <section className="relative bg-card text-card-foreground py-20 md:py-32">
