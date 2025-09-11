@@ -79,6 +79,7 @@ export default function SiteHeader() {
             <nav className="hidden md:flex gap-6 text-sm font-medium">
               <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
               <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
+              <Link href="/my-orders" className="text-foreground/80 hover:text-foreground transition-colors">My Orders</Link>
             </nav>
              <div className="relative">
               <Button aria-label={`Open cart with ${cartCount} items`} variant="ghost" size="icon" onClick={() => setIsCartOpen(true)}>
