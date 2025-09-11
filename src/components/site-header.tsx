@@ -23,6 +23,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from '@/components/ui/skeleton';
+import { ThemeToggle } from './theme-toggle';
 
 export default function SiteHeader() {
   const { cartCount } = useCart();
@@ -89,6 +90,7 @@ export default function SiteHeader() {
               <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
               <Link href="/my-orders" className="text-foreground/80 hover:text-foreground transition-colors">My Orders</Link>
             </nav>
+            <ThemeToggle />
              <div className="relative">
               <Button aria-label={`Open cart with ${cartCount} items`} variant="ghost" size="icon" onClick={() => setIsCartOpen(true)}>
                 <ShoppingCart className="h-5 w-5" />
