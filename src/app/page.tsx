@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { products } from '@/lib/products';
+import { initialProducts as products } from '@/lib/products';
 import ProductCard from '@/components/product-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';

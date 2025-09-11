@@ -1,6 +1,17 @@
+import { getProducts } from './firestore';
 import type { Product } from './types';
 
-export const products: Product[] = [
+// This file now fetches products from Firestore.
+// The initial static data is no longer used directly by the app but can be kept for reference
+// or for seeding the database for the first time.
+
+export let products: Product[] = [];
+
+getProducts().then(dbProducts => {
+  products = dbProducts;
+});
+
+export const initialProducts: Product[] = [
   {
     id: '1',
     name: 'Classic Wristband',

@@ -37,17 +37,21 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MoreHorizontal, PlusCircle } from "lucide-react"
-import { products as initialProducts } from "@/lib/products"
+import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Product } from "@/lib/types"
+import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/firestore"
+import { useToast } from "@/hooks/use-toast"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminPage() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -57,6 +61,27 @@ export default function AdminPage() {
     price: 0,
     category: '',
   });
+  const { toast } = useToast();
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const productsFromDb = await getProducts();
+      setProducts(productsFromDb);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching products",
+        description: "Could not load product data. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleOpenForm = (product: Product | null) => {
     setSelectedProduct(product);
@@ -84,25 +109,37 @@ export default function AdminPage() {
     setFormData(prev => ({ ...prev, [id]: id === 'price' ? parseFloat(value) || 0 : value }));
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedProduct) {
-      // Edit product
-      const updatedProducts = products.map(p =>
-        p.id === selectedProduct.id ? { ...p, ...formData } : p
-      );
-      setProducts(updatedProducts);
-    } else {
-      // Add new product
-      const newProduct: Product = {
-        id: (products.length + 1).toString(),
+    setIsSubmitting(true);
+    
+    const productData = {
         ...formData,
         image: `https://picsum.photos/seed/${formData.name.replace(/\s+/g, '-')}/400/400`,
         imageHint: formData.category.toLowerCase(),
-      };
-      setProducts([...products, newProduct]);
+    };
+
+    try {
+      if (selectedProduct) {
+        // Edit product
+        await updateProduct(selectedProduct.id, productData);
+        toast({ title: "Product updated successfully!" });
+      } else {
+        // Add new product
+        await addProduct(productData);
+        toast({ title: "Product added successfully!" });
+      }
+      fetchProducts(); // Refresh data
+      handleCloseForm();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "An error occurred",
+        description: "Could not save the product. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    handleCloseForm();
   };
 
   const openDeleteDialog = (product: Product) => {
@@ -110,11 +147,22 @@ export default function AdminPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (productToDelete) {
-      setProducts(products.filter(p => p.id !== productToDelete.id));
-      setIsDeleteDialogOpen(false);
-      setProductToDelete(null);
+      try {
+        await deleteProduct(productToDelete.id);
+        toast({ title: "Product deleted successfully" });
+        fetchProducts(); // Refresh data
+      } catch (error) {
+         toast({
+          variant: "destructive",
+          title: "Error deleting product",
+          description: "Could not delete the product. Please try again.",
+        });
+      } finally {
+        setIsDeleteDialogOpen(false);
+        setProductToDelete(null);
+      }
     }
   };
 
@@ -145,7 +193,21 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
+              {isLoading ? (
+                 Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="hidden sm:table-cell">
+                      <Skeleton className="h-16 w-16 rounded-md" />
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-3/4" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-1/2" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-1/4" /></TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="hidden sm:table-cell">
                     <Image
@@ -216,9 +278,12 @@ export default function AdminPage() {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="secondary">Cancel</Button>
+                <Button type="button" variant="secondary" disabled={isSubmitting}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">{selectedProduct ? 'Save Changes' : 'Add Product'}</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {selectedProduct ? 'Save Changes' : 'Add Product'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -230,7 +295,7 @@ export default function AdminPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the product from the list.
+              This action cannot be undone. This will permanently delete the product from the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
