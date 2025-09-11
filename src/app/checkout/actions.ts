@@ -14,25 +14,26 @@ interface OrderData {
 }
 
 export async function placeOrder(orderData: OrderData) {
-  let newOrder;
   try {
-    newOrder = await createOrder({
+    const newOrder = await createOrder({
       userId: orderData.userId,
       customerName: orderData.customerName,
       shippingAddress: orderData.shippingAddress,
       orderItems: orderData.cartItems,
       totalAmount: orderData.cartTotal,
     });
+    // This redirect must happen outside of a try...catch that returns a value.
+    // The successful path ends here with a redirect.
+    redirect(`/payment?orderId=${newOrder.id}`);
+
   } catch (error) {
     console.error('Failed to create order:', error);
     // In case of an error, we return a message.
+    // This is the only return path in case of failure.
     return {
       error: 'There was a problem creating your order. Please try again.',
     };
   }
-
-  // Redirect to the payment page with the new order's ID on success
-  redirect(`/payment?orderId=${newOrder.id}`);
 }
 
 
