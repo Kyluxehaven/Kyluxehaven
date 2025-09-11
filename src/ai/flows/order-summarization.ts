@@ -74,7 +74,7 @@ const summarizeOrderFlow = ai.defineFlow(
     outputSchema: SummarizeOrderOutputSchema,
   },
   async input => {
-    const result = await summarizeOrderPrompt(input);
-    return result.text;
+    const response = await summarizeOrderPrompt(input);
+    return response.text;
   }
 );
