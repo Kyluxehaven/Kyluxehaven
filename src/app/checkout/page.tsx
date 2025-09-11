@@ -16,6 +16,7 @@ import { Loader2 } from 'lucide-react';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().min(10, 'Please enter a valid phone number'),
   address: z.string().min(10, 'Please enter a valid address'),
   city: z.string().min(2, 'City is required'),
   zip: z.string().min(4, 'ZIP code is required'),
@@ -32,6 +33,7 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       name: '',
+      phone: '',
       address: '',
       city: '',
       zip: '',
@@ -107,19 +109,34 @@ export default function CheckoutPage() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+234 801 234 5678" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="address"
@@ -141,7 +158,7 @@ export default function CheckoutPage() {
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input placeholder="New York" {...field} />
+                          <Input placeholder="Lagos" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -154,7 +171,7 @@ export default function CheckoutPage() {
                       <FormItem>
                         <FormLabel>ZIP Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="10001" {...field} />
+                          <Input placeholder="100001" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -174,5 +191,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
