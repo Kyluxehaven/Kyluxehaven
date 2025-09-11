@@ -140,6 +140,11 @@ export async function updateOrder(id: string, data: Partial<Order>): Promise<voi
     await updateDoc(orderDoc, data);
 }
 
+export async function deleteOrder(id: string): Promise<void> {
+  const orderDoc = doc(db, 'orders', id);
+  await deleteDoc(orderDoc);
+}
+
 function processOrder(doc: any): Order {
     const data = doc.data() as FirestoreOrder;
     return {

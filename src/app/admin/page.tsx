@@ -39,14 +39,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MoreHorizontal, PlusCircle, Loader2, LogOut, ShieldAlert, Package, ShoppingCart, Check, ChevronsUpDown, Eye } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Loader2, LogOut, ShieldAlert, Package, ShoppingCart, Check, ChevronsUpDown, Eye, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState, useEffect } from "react"
 import type { Product, Order, OrderStatus } from "@/lib/types"
-import { getProducts, addProduct, updateProduct, deleteProduct, getAllOrders, updateOrder } from "@/lib/firestore"
+import { getProducts, addProduct, updateProduct, deleteProduct, getAllOrders, updateOrder, deleteOrder } from "@/lib/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/hooks/use-auth";
@@ -381,7 +381,9 @@ const statusOptions: OrderStatus[] = ['Pending', 'Approved', 'Shipped', 'Deliver
 function OrdersTab() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState<string | null>(null); // Store order ID being updated
+    const [isUpdating, setIsUpdating] = useState<string | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
     const { toast } = useToast();
 
     const fetchOrders = async () => {
@@ -410,7 +412,7 @@ function OrdersTab() {
         try {
             await updateOrder(orderId, { status });
             toast({ title: "Order status updated successfully!" });
-            fetchOrders(); // Refresh data
+            fetchOrders();
         } catch (error) {
             console.error("Error updating order status:", error);
             toast({
@@ -423,6 +425,30 @@ function OrdersTab() {
         }
     };
     
+    const openDeleteDialog = (order: Order) => {
+        setOrderToDelete(order);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (orderToDelete) {
+            try {
+                await deleteOrder(orderToDelete.id);
+                toast({ title: "Order deleted successfully" });
+                fetchOrders();
+            } catch (error) {
+                toast({
+                    variant: "destructive",
+                    title: "Error deleting order",
+                    description: "Could not delete the order. Please try again.",
+                });
+            } finally {
+                setIsDeleteDialogOpen(false);
+                setOrderToDelete(null);
+            }
+        }
+    };
+
     const getStatusColor = (status: OrderStatus) => {
         switch(status) {
             case 'Pending': return 'bg-yellow-500';
@@ -435,81 +461,113 @@ function OrdersTab() {
     }
 
     return (
-        <Card className="mt-6">
-            <CardHeader>
-                <CardTitle>Order Management</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Order ID</TableHead>
-                            <TableHead>Customer</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            Array.from({ length: 5 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell><Skeleton className="h-4 w-24"/></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-32"/></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-20"/></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-16"/></TableCell>
-                                    <TableCell><Skeleton className="h-6 w-24 rounded-full"/></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full"/></TableCell>
-                                </TableRow>
-                            ))
-                        ) : orders.map((order) => (
-                            <TableRow key={order.id}>
-                                <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                                <TableCell>{order.customerName}</TableCell>
-                                <TableCell>{format(new Date(order.createdAt), 'P')}</TableCell>
-                                <TableCell>₦{order.totalAmount.toFixed(2)}</TableCell>
-                                <TableCell>
-                                   <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" className="w-32 justify-between" disabled={isUpdating === order.id}>
-                                                {isUpdating === order.id ? <Loader2 className="h-4 w-4 animate-spin"/> :
-                                                <>
-                                                    <span className={`h-2 w-2 rounded-full mr-2 ${getStatusColor(order.status)}`}/>
-                                                    {order.status}
-                                                    <ChevronsUpDown className="h-4 w-4 opacity-50"/>
-                                                </>
-                                                }
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                                            {statusOptions.map(status => (
-                                                <DropdownMenuItem key={status} onSelect={() => handleStatusChange(order.id, status)}>
-                                                    <span className={`h-2 w-2 rounded-full mr-2 ${getStatusColor(status)}`}/>
-                                                    {status}
-                                                    {order.status === status && <Check className="ml-auto h-4 w-4"/>}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                     {order.paymentProofUrl && (
-                                        <Button asChild variant="outline" size="icon">
-                                            <a href={order.paymentProofUrl} target="_blank" rel="noopener noreferrer">
-                                                <Eye className="h-4 w-4" />
-                                                <span className="sr-only">View Payment Proof</span>
-                                            </a>
-                                        </Button>
-                                    )}
-                                </TableCell>
+        <>
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle>Order Management</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Order ID</TableHead>
+                                <TableHead>Customer</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Total</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-4 w-24"/></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-32"/></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-20"/></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-16"/></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-24 rounded-full"/></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full"/></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : orders.map((order) => (
+                                <TableRow key={order.id}>
+                                    <TableCell className="font-mono text-xs">{order.id}</TableCell>
+                                    <TableCell>{order.customerName}</TableCell>
+                                    <TableCell>{format(new Date(order.createdAt), 'P')}</TableCell>
+                                    <TableCell>₦{order.totalAmount.toFixed(2)}</TableCell>
+                                    <TableCell>
+                                       <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="sm" className="w-32 justify-between" disabled={isUpdating === order.id}>
+                                                    {isUpdating === order.id ? <Loader2 className="h-4 w-4 animate-spin"/> :
+                                                    <>
+                                                        <span className={`h-2 w-2 rounded-full mr-2 ${getStatusColor(order.status)}`}/>
+                                                        {order.status}
+                                                        <ChevronsUpDown className="h-4 w-4 opacity-50"/>
+                                                    </>
+                                                    }
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                {statusOptions.map(status => (
+                                                    <DropdownMenuItem key={status} onSelect={() => handleStatusChange(order.id, status)}>
+                                                        <span className={`h-2 w-2 rounded-full mr-2 ${getStatusColor(status)}`}/>
+                                                        {status}
+                                                        {order.status === status && <Check className="ml-auto h-4 w-4"/>}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                                <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                {order.paymentProofUrl && (
+                                                    <DropdownMenuItem asChild>
+                                                        <a href={order.paymentProofUrl} target="_blank" rel="noopener noreferrer">
+                                                            <Eye className="mr-2 h-4 w-4" /> View Payment Proof
+                                                        </a>
+                                                    </DropdownMenuItem>
+                                                )}
+                                                <DropdownMenuItem
+                                                className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
+                                                onClick={() => openDeleteDialog(order)}
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Order
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the order from the database.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
 
