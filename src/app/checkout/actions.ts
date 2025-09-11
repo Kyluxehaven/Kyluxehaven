@@ -23,10 +23,20 @@ export async function placeOrder(orderData: OrderData) {
       totalAmount: orderData.cartTotal,
     });
     
+    // Redirect must be called outside of the try/catch block
+    // if the action also returns a value in the catch block.
+    // However, since we are confident in the redirect, we can place it here.
+    // The redirect function throws a NEXT_REDIRECT error, which is caught
+    // by Next.js to perform the redirection. It's not a "real" error in this context.
     redirect(`/payment?orderId=${newOrder.id}`);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to create order:', error);
+    // If the error is the special redirect error, we don't want to treat it as a real error.
+    if (error.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+    // For all other errors, return an error object for the client to handle.
     return {
       error: 'There was a problem creating your order. Please try again.',
     };
