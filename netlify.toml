@@ -1,0 +1,10 @@
+[build]
+  command = "next build"
+  publish = ".next"
+
+[build.environment]
+  # Disable Genkit telemetry during the build process
+  GENKIT_TELEMETRY_DISABLED = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

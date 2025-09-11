@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Search, LogOut, Package, Menu } from 'lucide-react';
+import { ShoppingCart, Search, LogOut, Package, Menu, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/use-cart';
@@ -89,6 +89,7 @@ export default function SiteHeader() {
               <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
               <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
               <Link href="/my-orders" className="text-foreground/80 hover:text-foreground transition-colors">My Orders</Link>
+              <Link href="/contact" className="text-foreground/80 hover:text-foreground transition-colors">Contact</Link>
             </nav>
             <ThemeToggle />
              <div className="relative">
@@ -174,6 +175,9 @@ export default function SiteHeader() {
                           </SheetClose>
                           <SheetClose asChild>
                             <Link href="/my-orders" className="text-foreground/80 hover:text-foreground transition-colors">My Orders</Link>
+                          </SheetClose>
+                          <SheetClose asChild>
+                              <Link href="/contact" className="text-foreground/80 hover:text-foreground transition-colors">Contact</Link>
                           </SheetClose>
                         </nav>
                     </div>
