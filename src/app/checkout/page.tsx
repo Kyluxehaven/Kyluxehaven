@@ -73,7 +73,6 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
     
-    // Simplify cart items for the server action
     const simpleCartItems = cartItems.map(item => ({
         id: item.id,
         name: item.name,
@@ -94,13 +93,16 @@ export default function CheckoutPage() {
         throw new Error(result.error);
       }
     } catch (error: any) {
-      console.error("Failed to place order:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Could not place your order. Please try again.'
-      })
-      setIsSubmitting(false);
+        if (error.digest?.startsWith('NEXT_REDIRECT')) {
+            throw error;
+        }
+        console.error("Failed to place order:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: error.message || 'Could not place your order. Please try again.'
+        })
+        setIsSubmitting(false);
     }
   }
 
