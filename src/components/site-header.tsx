@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -149,6 +149,9 @@ export default function SiteHeader() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-full max-w-sm">
+                    <SheetHeader>
+                        <SheetTitle className="sr-only">Menu</SheetTitle>
+                    </SheetHeader>
                     <div className="p-6">
                         <form onSubmit={handleSearchSubmit} className="relative mb-6">
                         <Input
