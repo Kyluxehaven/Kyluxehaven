@@ -51,6 +51,12 @@ const nextConfig: NextConfig = {
         hostname: 'foundationgift.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'eragem.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
