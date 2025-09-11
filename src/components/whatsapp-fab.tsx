@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from 'react';
 
 const WhatsAppIcon = () => (
   <svg
@@ -17,19 +20,53 @@ const WhatsAppIcon = () => (
 
 
 export default function WhatsAppFab() {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    // Show the tooltip for 2.5 seconds every 5 seconds
+    const interval = setInterval(() => {
+      setShowTooltip(true);
+      setTimeout(() => {
+        setShowTooltip(false);
+      }, 2500);
+    }, 5000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+  
   const phoneNumber = "2348112289850";
   const message = "Hello! I'm interested in your products.";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   return (
-    <Link 
-      href={whatsappUrl} 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white rounded-full p-3 shadow-lg hover:bg-[#128C7E] transition-transform transform hover:scale-110"
-      aria-label="Chat on WhatsApp"
-    >
-      <WhatsAppIcon />
-    </Link>
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4">
+       <div 
+        className={`
+          bg-card 
+          px-4 py-2 
+          rounded-lg 
+          shadow-md 
+          text-sm 
+          font-medium
+          transition-all 
+          duration-300
+          origin-right
+          ${showTooltip ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
+        `}
+        aria-hidden={!showTooltip}
+      >
+        Chat on WhatsApp
+      </div>
+      <Link 
+        href={whatsappUrl} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="bg-[#25D366] text-white rounded-full p-3 shadow-lg hover:bg-[#128C7E] transition-transform transform hover:scale-110"
+        aria-label="Chat on WhatsApp"
+      >
+        <WhatsAppIcon />
+      </Link>
+    </div>
   );
 }
