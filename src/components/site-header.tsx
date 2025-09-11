@@ -24,6 +24,7 @@ export default function SiteHeader() {
           <div className="flex items-center gap-4">
             <nav className="hidden md:flex gap-6 text-sm font-medium">
               <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
+              <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
               <Link href="/admin" className="text-foreground/80 hover:text-foreground transition-colors">Admin</Link>
             </nav>
             <div className="relative">

@@ -7,6 +7,8 @@ import { Product } from '@/lib/types';
 
 export default async function Home() {
   const products: Product[] = await getProducts();
+  const featuredProducts = products.slice(0, 4);
+
   return (
     <div>
       <section className="relative bg-card text-card-foreground py-20 md:py-32">
@@ -31,7 +33,7 @@ export default async function Home() {
             </p>
             <div className="mt-8">
               <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link href="#products">Shop Now</Link>
+                <Link href="/shop">Shop Now</Link>
               </Button>
             </div>
           </div>
@@ -40,11 +42,16 @@ export default async function Home() {
 
       <section id="products" className="py-16 sm:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-headline font-bold text-center mb-12">Our Products</h2>
+          <h2 className="text-3xl sm:text-4xl font-headline font-bold text-center mb-12">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-            {products.map((product) => (
+            {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild size="lg" variant="outline">
+              <Link href="/shop">View All Products</Link>
+            </Button>
           </div>
         </div>
       </section>
