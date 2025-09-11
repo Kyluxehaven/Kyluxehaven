@@ -5,6 +5,7 @@ import { CartProvider } from '@/context/cart-context';
 import SiteHeader from '@/components/site-header';
 import Footer from '@/components/footer';
 import { AuthProvider } from '@/context/auth-context';
+import WhatsAppFab from '@/components/whatsapp-fab';
 
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({
               <main className="flex-grow">{children}</main>
               <Footer />
             </div>
+            <WhatsAppFab />
             <Toaster />
           </CartProvider>
         </AuthProvider>
