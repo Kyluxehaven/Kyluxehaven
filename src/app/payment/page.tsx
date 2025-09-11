@@ -11,11 +11,13 @@ import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/hooks/use-cart';
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { clearCart } = useCart();
   const orderDataString = searchParams.get('orderData');
 
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
@@ -62,7 +64,8 @@ export default function PaymentPage() {
       return;
     }
     // In a real application, you would upload the `paymentProof` file here.
-    // For this demo, we'll proceed to the confirmation page.
+    // For this demo, we'll clear the cart and proceed to the confirmation page.
+    clearCart();
     const params = new URLSearchParams({ orderData: orderDataString });
     router.push(`/order/${orderId}?${params.toString()}`);
   };

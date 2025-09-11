@@ -25,7 +25,7 @@ const checkoutSchema = z.object({
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal } = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,8 +50,9 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
     try {
+      // The redirect happens inside placeOrder, so clearCart() was never called.
+      // It has been moved to the payment page.
       await placeOrder(cartItems, data.name, shippingAddress);
-      clearCart();
     } catch (error) {
       // In a real app, you would show an error toast here
       console.error("Failed to place order:", error);
