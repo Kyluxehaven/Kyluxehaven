@@ -1,6 +1,7 @@
 import { db, storage } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import type { Product, Order, OrderItem, FirestoreOrder } from './types';
+import { revalidatePath } from 'next/cache';
 
 const productsCollection = collection(db, 'products');
 const ordersCollection = collection(db, 'orders');
@@ -102,17 +103,23 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function addProduct(product: Omit<Product, 'id'>): Promise<string> {
   const docRef = await addDoc(productsCollection, product);
+  revalidatePath('/');
+  revalidatePath('/shop');
   return docRef.id;
 }
 
 export async function updateProduct(id: string, product: Partial<Omit<Product, 'id'>>): Promise<void> {
   const productDoc = doc(db, 'products', id);
   await updateDoc(productDoc, product);
+  revalidatePath('/');
+  revalidatePath('/shop');
 }
 
 export async function deleteProduct(id: string): Promise<void> {
   const productDoc = doc(db, 'products', id);
   await deleteDoc(productDoc);
+  revalidatePath('/');
+  revalidatePath('/shop');
 }
 
 

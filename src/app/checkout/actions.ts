@@ -4,6 +4,7 @@
 import { redirect } from 'next/navigation';
 import { createOrder, uploadPaymentProof, updateOrder } from '@/lib/firestore';
 import type { OrderItem } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 interface OrderData {
     userId: string;
@@ -23,6 +24,7 @@ export async function placeOrder(orderData: OrderData) {
       totalAmount: orderData.cartTotal,
     });
     
+    revalidatePath('/');
     redirect(`/payment?orderId=${newOrder.id}`);
 
   } catch (error: any) {
@@ -55,6 +57,7 @@ export async function confirmPayment(orderId: string, formData: FormData) {
         const proofUrl = await uploadPaymentProof(proofDataUrl);
         await updateOrder(orderId, { paymentProofUrl: proofUrl });
         
+        revalidatePath('/');
         redirect(`/order/${orderId}`);
 
     } catch (error: any) {
