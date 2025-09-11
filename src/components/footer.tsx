@@ -39,7 +39,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear() + 1} KyLuxeHaven. All rights reserved.</p>
+          <p>&copy; 2025 KyLuxeHaven. All rights reserved.</p>
         </div>
       </div>
     </footer>
