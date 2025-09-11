@@ -156,24 +156,25 @@ export default function AdminPage() {
     }
 
     try {
+      const productData = {
+        ...formData,
+        image: imageUrl,
+        imageHint: formData.category.toLowerCase(),
+      };
+
       if (selectedProduct) {
         // Edit product
-        const productData: Partial<Omit<Product, 'id'>> = { ...formData, image: imageUrl, imageHint: formData.category.toLowerCase() };
         await updateProduct(selectedProduct.id, productData);
         toast({ title: "Product updated successfully!" });
       } else {
         // Add new product
-         const productData = {
-            ...formData,
-            image: imageUrl,
-            imageHint: formData.category.toLowerCase(),
-        };
         await addProduct(productData);
         toast({ title: "Product added successfully!" });
       }
       fetchProducts(); // Refresh data
       handleCloseForm();
     } catch (error) {
+      console.error(error);
       toast({
         variant: "destructive",
         title: "An error occurred",
@@ -307,7 +308,7 @@ export default function AdminPage() {
                   <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="col-span-3" />
                   {imagePreview && (
                       <div className="mt-4 relative w-24 h-24">
-                          <Image src={imagePreview} alt="Image preview" layout="fill" className="rounded-md object-cover" />
+                          <Image src={imagePreview} alt="Image preview" fill className="rounded-md object-cover" />
                       </div>
                   )}
                 </div>
