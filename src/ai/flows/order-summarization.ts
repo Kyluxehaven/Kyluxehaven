@@ -42,6 +42,7 @@ export async function summarizeOrder(input: SummarizeOrderInput): Promise<Summar
 const summarizeOrderPrompt = ai.definePrompt({
   name: 'summarizeOrderPrompt',
   input: {schema: SummarizeOrderInputSchema},
+  output: {schema: SummarizeOrderOutputSchema},
   prompt: `You are an order summarization expert for KyluxeHaven, an e-commerce website.
   Your task is to generate a clear, concise, and accurate summary of a customer's order.
   The currency is Nigerian Naira (₦).
