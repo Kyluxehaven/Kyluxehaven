@@ -1,0 +1,13 @@
+[
+  {
+    "origin": ["*"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "X-Goog-Resumable",
+      "X-Goog-Meta-*"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
