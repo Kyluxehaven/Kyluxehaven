@@ -75,7 +75,6 @@ const summarizeOrderFlow = ai.defineFlow(
   },
   async input => {
     const result = await summarizeOrderPrompt(input);
-    // The result object contains the generated text. We must explicitly return the `text` property.
     return result.text;
   }
 );
