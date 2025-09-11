@@ -245,6 +245,7 @@ function ProductsTab() {
                 </Button>
             </CardHeader>
             <CardContent className="p-0">
+            <div className="overflow-x-auto">
             <Table>
                 <TableHeader>
                 <TableRow>
@@ -305,6 +306,7 @@ function ProductsTab() {
                 ))}
                 </TableBody>
             </Table>
+            </div>
             </CardContent>
             
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -467,6 +469,7 @@ function OrdersTab() {
                     <CardTitle>Order Management</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
+                    <div className="overflow-x-auto">
                      <Table>
                         <TableHeader>
                             <TableRow>
@@ -551,6 +554,7 @@ function OrdersTab() {
                             ))}
                         </TableBody>
                     </Table>
+                    </div>
                 </CardContent>
             </Card>
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

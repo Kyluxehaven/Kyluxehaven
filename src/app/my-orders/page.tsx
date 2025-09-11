@@ -134,18 +134,19 @@ export default function MyOrdersPage() {
         <Accordion type="single" collapsible className="w-full space-y-4">
           {orders.map((order) => (
             <AccordionItem key={order.id} value={order.id} className="bg-card border rounded-lg">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+              <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
                 <div className="flex-1 flex items-center gap-4 text-left">
                    <div className="flex-1">
-                     <p className="font-semibold">Order ID: <span className="font-mono text-sm text-muted-foreground">{order.id}</span></p>
-                     <p className="text-sm text-muted-foreground">
-                        {format(new Date(order.createdAt), 'PPP')}
+                     <p className="font-semibold text-sm sm:text-base">Order ID</p>
+                     <p className="font-mono text-xs sm:text-sm text-muted-foreground truncate max-w-[120px] sm:max-w-none">{order.id}</p>
+                     <p className="sm:hidden text-xs text-muted-foreground mt-1">
+                        {format(new Date(order.createdAt), 'PP')}
                      </p>
                    </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 ml-2">
                     <p className="font-semibold hidden sm:block">₦{order.totalAmount.toFixed(2)}</p>
-                    <Badge variant={order.status === 'Approved' ? 'default' : 'secondary'}>{order.status}</Badge>
+                    <Badge variant={order.status === 'Approved' ? 'default' : 'secondary'} className="text-xs">{order.status}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-6">
@@ -168,7 +169,7 @@ export default function MyOrdersPage() {
                     ))}
                  </div>
                  <Separator className="my-4"/>
-                 <div className="flex justify-between items-end">
+                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -188,7 +189,7 @@ export default function MyOrdersPage() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right w-full sm:w-auto">
                         <p className="text-sm">Subtotal: <span className="font-medium">₦{order.totalAmount.toFixed(2)}</span></p>
                         <p className="text-sm">Shipping: <span className="font-medium">Free</span></p>
                         <p className="text-base font-bold mt-1">Total: <span className="font-bold">₦{order.totalAmount.toFixed(2)}</span></p>

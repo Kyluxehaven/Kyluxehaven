@@ -82,19 +82,20 @@ export default function CheckoutPage() {
     }));
 
     try {
-      const result = await placeOrder({
-        userId: user.uid,
-        customerName: data.name,
-        shippingAddress,
-        cartItems: simpleCartItems,
-        cartTotal
-      });
-      if (result?.error) {
-        throw new Error(result.error);
-      }
+        const result = await placeOrder({
+            userId: user.uid,
+            customerName: data.name,
+            shippingAddress,
+            cartItems: simpleCartItems,
+            cartTotal
+        });
+
+        if (result?.error) {
+            throw new Error(result.error);
+        }
     } catch (error: any) {
         if (error.digest?.startsWith('NEXT_REDIRECT')) {
-            throw error;
+            throw error; // Let Next.js handle the redirect
         }
         console.error("Failed to place order:", error);
         toast({
@@ -137,38 +138,8 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="text-3xl sm:text-4xl font-headline font-bold text-center mb-12">Checkout</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {cartItems.map(item => (
-                  <div key={item.id} className="flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-12 w-12 rounded-md overflow-hidden border">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                      </div>
-                    </div>
-                    <p className="font-medium">₦{(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="border-t my-4"></div>
-              <div className="flex justify-between font-bold text-lg">
-                <p>Total</p>
-                <p>₦{cartTotal.toFixed(2)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8">
+        <div className="lg:order-2">
           <Card>
             <CardHeader>
               <CardTitle>Shipping Information</CardTitle>
@@ -176,7 +147,7 @@ export default function CheckoutPage() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -217,7 +188,7 @@ export default function CheckoutPage() {
                       </FormItem>
                     )}
                   />
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="city"
@@ -251,6 +222,36 @@ export default function CheckoutPage() {
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="lg:order-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {cartItems.map(item => (
+                  <div key={item.id} className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-12 w-12 rounded-md overflow-hidden border">
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                      </div>
+                    </div>
+                    <p className="font-medium">₦{(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t my-4"></div>
+              <div className="flex justify-between font-bold text-lg">
+                <p>Total</p>
+                <p>₦{cartTotal.toFixed(2)}</p>
+              </div>
             </CardContent>
           </Card>
         </div>

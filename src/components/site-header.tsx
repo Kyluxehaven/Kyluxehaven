@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Search, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, Search, LogOut, Package, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/use-cart';
@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -31,6 +32,7 @@ export default function SiteHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -40,6 +42,7 @@ export default function SiteHeader() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -68,7 +71,7 @@ export default function SiteHeader() {
               <Logo />
             </Link>
           </div>
-          <div className="flex-1 flex justify-center px-4">
+          <div className="hidden md:flex flex-1 justify-center px-4">
             <form onSubmit={handleSearchSubmit} className="w-full max-w-md relative">
               <Input
                 type="search"
@@ -138,6 +141,39 @@ export default function SiteHeader() {
                     Sign In
                 </Button>
             )}
+             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                        <Menu className="h-5 w-5" />
+                        <span className="sr-only">Open menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-full max-w-sm">
+                    <div className="p-6">
+                        <form onSubmit={handleSearchSubmit} className="relative mb-6">
+                        <Input
+                            type="search"
+                            placeholder="Search products..."
+                            className="w-full pr-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        </form>
+                        <nav className="flex flex-col gap-4 text-lg font-medium">
+                          <SheetClose asChild>
+                            <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
+                          </SheetClose>
+                          <SheetClose asChild>
+                            <Link href="/my-orders" className="text-foreground/80 hover:text-foreground transition-colors">My Orders</Link>
+                          </SheetClose>
+                        </nav>
+                    </div>
+                </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
