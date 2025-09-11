@@ -3,9 +3,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getOrdersForUser } from "@/lib/firestore";
+import { deleteOrder, getOrdersForUser } from "@/lib/firestore";
 import type { Order } from "@/lib/types";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, MoreHorizontal, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,18 +20,57 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useToast } from "@/hooks/use-toast";
 
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+
+  async function fetchOrders() {
+      if (!user) return;
+      setIsLoading(true);
+      try {
+        const userOrders = await getOrdersForUser(user.uid);
+        setOrders(userOrders);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch your orders.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
   useEffect(() => {
     if (authLoading) return;
@@ -40,20 +79,34 @@ export default function MyOrdersPage() {
       router.push("/login");
       return;
     }
-
-    async function fetchOrders() {
-      try {
-        const userOrders = await getOrdersForUser(user!.uid);
-        setOrders(userOrders);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
+    
     fetchOrders();
   }, [user, authLoading, router]);
+
+  const openDeleteDialog = (order: Order) => {
+    setOrderToDelete(order);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (orderToDelete) {
+      try {
+        await deleteOrder(orderToDelete.id);
+        toast({ title: "Order deleted successfully" });
+        fetchOrders(); // Refresh the list
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error deleting order",
+          description: "Could not delete the order. Please try again.",
+        });
+      } finally {
+        setIsDeleteDialogOpen(false);
+        setOrderToDelete(null);
+      }
+    }
+  };
+
 
   if (isLoading || authLoading) {
     return (
@@ -115,7 +168,26 @@ export default function MyOrdersPage() {
                     ))}
                  </div>
                  <Separator className="my-4"/>
-                 <div className="flex justify-end">
+                 <div className="flex justify-between items-end">
+                    <div>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <MoreHorizontal className="h-4 w-4 mr-2"/>
+                                    Actions
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
+                                <DropdownMenuItem 
+                                    className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
+                                    onSelect={() => openDeleteDialog(order)}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Order
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                     <div className="text-right">
                         <p className="text-sm">Subtotal: <span className="font-medium">₦{order.totalAmount.toFixed(2)}</span></p>
                         <p className="text-sm">Shipping: <span className="font-medium">Free</span></p>
@@ -127,6 +199,20 @@ export default function MyOrdersPage() {
           ))}
         </Accordion>
       )}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete this order from your history.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+        </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
