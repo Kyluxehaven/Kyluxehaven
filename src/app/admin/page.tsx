@@ -37,7 +37,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MoreHorizontal, PlusCircle, Loader2, LogOut } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Loader2, LogOut, ShieldAlert } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -360,17 +360,40 @@ function AdminDashboard() {
   )
 }
 
+const ADMIN_UID = "O0dGhZynNgYa6eeZ3r5UDQvRU6h2";
+const ADMIN_EMAIL = "kyluxehaven@outloo.com";
+
 export default function AdminPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
+    const { toast } = useToast();
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
     useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
+        if (loading) {
+            return;
         }
-    }, [user, loading, router]);
 
-    if (loading || !user) {
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+
+        const authorized = user.uid === ADMIN_UID && user.email === ADMIN_EMAIL;
+        setIsAuthorized(authorized);
+
+        if (!authorized) {
+            toast({
+                variant: 'destructive',
+                title: 'Not Authorized',
+                description: 'You do not have permission to access the admin dashboard.',
+            });
+            router.push('/');
+        }
+
+    }, [user, loading, router, toast]);
+
+    if (loading || isAuthorized === null) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-16 w-16 animate-spin text-primary" />
@@ -378,5 +401,18 @@ export default function AdminPage() {
         )
     }
 
+    if (!isAuthorized) {
+       // This will be shown briefly before redirection
+        return (
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+                <ShieldAlert className="mx-auto h-16 w-16 text-destructive" />
+                <h1 className="mt-4 text-2xl font-bold">Access Denied</h1>
+                <p className="mt-2 text-muted-foreground">Redirecting...</p>
+          </div>
+        );
+    }
+
     return <AdminDashboard />;
 }
+
+    
