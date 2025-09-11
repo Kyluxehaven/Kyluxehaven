@@ -13,18 +13,25 @@ interface OrderData {
 }
 
 export async function placeOrder(orderData: OrderData) {
-  // We're creating the order with a 'Pending' status here,
-  // before the payment proof is uploaded.
-  const newOrder = await createOrder({
-    userId: orderData.userId,
-    customerName: orderData.customerName,
-    shippingAddress: orderData.shippingAddress,
-    orderItems: orderData.cartItems,
-    totalAmount: orderData.cartTotal,
-  });
+  try {
+    const newOrder = await createOrder({
+      userId: orderData.userId,
+      customerName: orderData.customerName,
+      shippingAddress: orderData.shippingAddress,
+      orderItems: orderData.cartItems,
+      totalAmount: orderData.cartTotal,
+    });
 
-  // Redirect to the payment page with the new order's ID
-  redirect(`/payment?orderId=${newOrder.id}`);
+    // Redirect to the payment page with the new order's ID
+    redirect(`/payment?orderId=${newOrder.id}`);
+  } catch (error) {
+    console.error('Failed to create order:', error);
+    // The redirect in a try-catch block requires this return type.
+    // In case of an error, we can return a message.
+    return {
+      error: 'There was a problem creating your order. Please try again.',
+    };
+  }
 }
 
 

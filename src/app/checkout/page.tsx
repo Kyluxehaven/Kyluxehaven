@@ -72,19 +72,22 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
     try {
-      await placeOrder({
+      const result = await placeOrder({
         userId: user.uid,
         customerName: data.name,
         shippingAddress,
         cartItems,
         cartTotal
       });
-    } catch (error) {
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
       console.error("Failed to place order:", error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Could not place your order. Please try again.'
+        description: error.message || 'Could not place your order. Please try again.'
       })
       setIsSubmitting(false);
     }
