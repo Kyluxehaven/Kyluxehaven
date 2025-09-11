@@ -2,23 +2,14 @@
 "use server";
 
 import { redirect } from 'next/navigation';
-import type { Order } from '@/lib/types';
 import { createOrder, uploadPaymentProof, updateOrder } from '@/lib/firestore';
-
-// Simplified item structure for the action
-interface SimpleCartItem {
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-    image: string;
-}
+import type { OrderItem } from '@/lib/types';
 
 interface OrderData {
     userId: string;
     customerName: string;
     shippingAddress: string;
-    cartItems: SimpleCartItem[];
+    cartItems: OrderItem[];
     cartTotal: number;
 }
 
@@ -28,17 +19,14 @@ export async function placeOrder(orderData: OrderData) {
       userId: orderData.userId,
       customerName: orderData.customerName,
       shippingAddress: orderData.shippingAddress,
-      orderItems: orderData.cartItems, // This now expects SimpleCartItem[]
+      orderItems: orderData.cartItems,
       totalAmount: orderData.cartTotal,
     });
-    // This redirect must happen outside of a try...catch that returns a value.
-    // The successful path ends here with a redirect.
+    
     redirect(`/payment?orderId=${newOrder.id}`);
 
   } catch (error) {
     console.error('Failed to create order:', error);
-    // In case of an error, we return a message.
-    // This is the only return path in case of failure.
     return {
       error: 'There was a problem creating your order. Please try again.',
     };

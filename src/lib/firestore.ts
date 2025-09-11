@@ -1,6 +1,6 @@
 import { db, storage } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
-import type { Product, Order, CartItem, FirestoreOrder } from './types';
+import type { Product, Order, OrderItem, FirestoreOrder } from './types';
 
 const productsCollection = collection(db, 'products');
 const ordersCollection = collection(db, 'orders');
@@ -117,8 +117,15 @@ export async function deleteProduct(id: string): Promise<void> {
 
 
 // Order Functions
+type OrderInput = {
+    userId: string;
+    customerName: string;
+    shippingAddress: string;
+    orderItems: OrderItem[];
+    totalAmount: number;
+}
 
-export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<FirestoreOrder> {
+export async function createOrder(orderData: OrderInput): Promise<FirestoreOrder> {
     const newOrderRef = await addDoc(ordersCollection, {
         ...orderData,
         status: 'Pending',

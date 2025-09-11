@@ -1,4 +1,4 @@
-import { type Order, type FirestoreOrder, type CartItem } from '@/lib/types';
+import { type Order, type FirestoreOrder, type OrderItem } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -51,7 +51,7 @@ export default async function OrderConfirmationPage({
         </CardHeader>
         <CardContent>
             <div className="space-y-4">
-              {orderData.orderItems.map((item: CartItem) => (
+              {orderData.orderItems.map((item: OrderItem) => (
                 <div key={item.id} className="flex justify-between items-center text-sm">
                   <div className="flex items-center gap-3">
                     <div className="relative h-12 w-12 rounded-md overflow-hidden border">

@@ -14,6 +14,15 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+// Represents a simplified item within an order
+export interface OrderItem {
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+    image: string;
+}
+
 export type OrderStatus = 'Pending' | 'Approved' | 'Shipped' | 'Delivered' | 'Cancelled';
 
 export interface Order {
@@ -21,7 +30,7 @@ export interface Order {
     userId: string;
     customerName: string;
     shippingAddress: string;
-    orderItems: CartItem[];
+    orderItems: OrderItem[];
     totalAmount: number;
     status: OrderStatus;
     createdAt: string; // Changed from Timestamp
