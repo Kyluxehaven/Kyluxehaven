@@ -45,7 +45,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState, useEffect } from "react"
-import type { Product, Order, OrderStatus } from "@/lib/types"
+import type { Order, OrderStatus, Product } from "@/lib/types"
 import { getProducts, addProduct, updateProduct, deleteProduct, getAllOrders, updateOrder, deleteOrder } from "@/lib/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -625,5 +625,3 @@ export default function AdminPage() {
 
     return <AdminDashboard />;
 }
-
-    
