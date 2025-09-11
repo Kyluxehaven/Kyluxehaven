@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -72,11 +73,18 @@ export default function PaymentPage() {
         
         await confirmPayment(orderId, formData);
         
-        // This flow is now handled by the server action redirect
+        // On success, the server action will redirect.
+        // We only need to handle the case where it throws an error.
         clearCart();
-        // router.push(`/order/${orderId}`);
 
-    } catch (error) {
+    } catch (error: any) {
+        // The `redirect()` function in a server action throws a special `NEXT_REDIRECT` error.
+        // We need to catch it and re-throw it to allow the redirect to happen,
+        // otherwise it will be treated as a real error.
+        if (error.digest?.startsWith('NEXT_REDIRECT')) {
+          throw error;
+        }
+
         console.error(error);
         toast({
             variant: "destructive",
