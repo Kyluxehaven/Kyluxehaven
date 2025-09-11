@@ -1,12 +1,13 @@
+
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Search, User as UserIcon, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, Search, LogOut, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/use-cart';
 import { CartSheet } from './cart-sheet';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Logo from './logo';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SiteHeader() {
   const { cartCount } = useCart();
@@ -28,6 +30,11 @@ export default function SiteHeader() {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,13 +51,11 @@ export default function SiteHeader() {
   const getInitials = (nameOrEmail: string | null | undefined) => {
     if (!nameOrEmail) return 'U';
     
-    // If it's a name with spaces, get initials from first/last
     const nameParts = nameOrEmail.split(' ');
     if (nameParts.length > 1 && nameParts[0] && nameParts[1]) {
       return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
     
-    // Otherwise, just use the first letter
     return nameOrEmail.charAt(0).toUpperCase();
   }
 
@@ -85,13 +90,15 @@ export default function SiteHeader() {
               <Button aria-label={`Open cart with ${cartCount} items`} variant="ghost" size="icon" onClick={() => setIsCartOpen(true)}>
                 <ShoppingCart className="h-5 w-5" />
               </Button>
-              {cartCount > 0 && (
+              {isClient && cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold" aria-hidden="true">
                   {cartCount}
                 </span>
               )}
             </div>
-            {user ? (
+            {!isClient ? (
+                <Skeleton className="h-8 w-20" />
+            ) : user ? (
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
