@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Elegant accessories on display",
+      "imageUrl": "https://picsum.photos/seed/hero-bg/1920/1080",
+      "imageHint": "elegant accessories"
+    },
+    {
+      "id": "wristband",
+      "description": "A stylish wristband",
+      "imageUrl": "https://picsum.photos/seed/wristband/400/400",
+      "imageHint": "wristband fashion"
+    },
+    {
+      "id": "wristwatch",
+      "description": "An elegant wristwatch",
+      "imageUrl": "https://picsum.photos/seed/wristwatch/400/400",
+      "imageHint": "wristwatch elegant"
+    },
+    {
+      "id": "bracelet",
+      "description": "A beautiful bracelet",
+      "imageUrl": "https://picsum.photos/seed/bracelet/400/400",
+      "imageHint": "bracelet jewelry"
+    },
+    {
+      "id": "wallet",
+      "description": "A leather wallet",
+      "imageUrl": "https://picsum.photos/seed/wallet/400/400",
+      "imageHint": "leather wallet"
+    },
+    {
+      "id": "belt",
+      "description": "A classic leather belt",
+      "imageUrl": "https://picsum.photos/seed/belt/400/400",
+      "imageHint": "leather belt"
+    },
+    {
+      "id": "cap",
+      "description": "A trendy cap",
+      "imageUrl": "https://picsum.photos/seed/cap/400/400",
+      "imageHint": "fashion cap"
+    },
+    {
+      "id": "earring",
+      "description": "A pair of shiny earrings",
+      "imageUrl": "https://picsum.photos/seed/earring/400/400",
+      "imageHint": "earrings jewelry"
+    },
+    {
+      "id": "lip-gloss",
+      "description": "A glossy lip gloss",
+      "imageUrl": "https://picsum.photos/seed/lipgloss/400/400",
+      "imageHint": "lip gloss"
+    },
+    {
+      "id": "hand-cream",
+      "description": "A moisturizing hand cream",
+      "imageUrl": "https://picsum.photos/seed/handcream/400/400",
+      "imageHint": "hand cream"
+    }
+  ]
 }
