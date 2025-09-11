@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read access to all files
+    match /{allPaths=**} {
+      allow read;
+    }
+
+    // Allow writes only to the payment_proofs directory
+    // This is open for demonstration purposes.
+    // For a real application, you should restrict this to authenticated users.
+    match /payment_proofs/{allPaths=**} {
+      allow write;
+    }
+  }
+}
