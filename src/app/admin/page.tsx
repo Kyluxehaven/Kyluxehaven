@@ -467,7 +467,7 @@ function OrdersTab() {
                             <TableRow key={order.id}>
                                 <TableCell className="font-mono text-xs">{order.id}</TableCell>
                                 <TableCell>{order.customerName}</TableCell>
-                                <TableCell>{format(order.createdAt.toDate(), 'P')}</TableCell>
+                                <TableCell>{format(new Date(order.createdAt), 'P')}</TableCell>
                                 <TableCell>₦{order.totalAmount.toFixed(2)}</TableCell>
                                 <TableCell>
                                    <DropdownMenu>

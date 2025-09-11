@@ -1,4 +1,4 @@
-import { type Order } from '@/lib/types';
+import { type Order, type FirestoreOrder } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -16,7 +16,13 @@ async function getOrderData(orderId: string): Promise<Order | null> {
     if (!orderSnap.exists()) {
         return null;
     }
-    return { id: orderSnap.id, ...orderSnap.data() } as Order;
+    const firestoreOrder = { id: orderSnap.id, ...orderSnap.data() } as FirestoreOrder;
+
+    // Serialize the Timestamp to a string
+    return {
+        ...firestoreOrder,
+        createdAt: firestoreOrder.createdAt.toDate().toISOString(),
+    };
 }
 
 
@@ -63,7 +69,7 @@ export default async function OrderConfirmationPage({
             </div>
              <div className="w-full flex justify-between items-center">
               <span className="text-muted-foreground">Order Date</span>
-              <span>{format(orderData.createdAt.toDate(), 'PPP')}</span>
+              <span>{format(new Date(orderData.createdAt), 'PPP')}</span>
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-muted-foreground">Status</span>

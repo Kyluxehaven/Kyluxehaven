@@ -1,8 +1,6 @@
 import { db, storage } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import type { Product, Order, CartItem } from './types';
-import { v4 as uuidv4 } from 'uuid';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
+import type { Product, Order, CartItem, FirestoreOrder } from './types';
 
 const productsCollection = collection(db, 'products');
 const ordersCollection = collection(db, 'orders');
@@ -120,7 +118,7 @@ export async function deleteProduct(id: string): Promise<void> {
 
 // Order Functions
 
-export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<Order> {
+export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<FirestoreOrder> {
     const newOrderRef = await addDoc(ordersCollection, {
         ...orderData,
         status: 'Pending',
@@ -128,7 +126,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 's
     });
 
     const newOrderSnap = await getDoc(newOrderRef);
-    return { id: newOrderSnap.id, ...newOrderSnap.data() } as Order;
+    return { id: newOrderSnap.id, ...newOrderSnap.data() } as FirestoreOrder;
 }
 
 // This function now just returns the string passed to it.
@@ -137,27 +135,28 @@ export async function uploadPaymentProof(proofAsDataUrl: string): Promise<string
   return proofAsDataUrl;
 }
 
-export async function updateOrder(id: string, data: { paymentProofUrl: string }): Promise<void> {
+export async function updateOrder(id: string, data: Partial<Order>): Promise<void> {
     const orderDoc = doc(db, 'orders', id);
     await updateDoc(orderDoc, data);
+}
+
+function processOrder(doc: any): Order {
+    const data = doc.data() as FirestoreOrder;
+    return {
+        id: doc.id,
+        ...data,
+        createdAt: (data.createdAt as Timestamp).toDate().toISOString(),
+    };
 }
 
 export async function getOrdersForUser(userId: string): Promise<Order[]> {
     const q = query(ordersCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    const orders: Order[] = [];
-    snapshot.forEach(doc => {
-        orders.push({ id: doc.id, ...doc.data() } as Order);
-    });
-    return orders;
+    return snapshot.docs.map(processOrder);
 }
 
 export async function getAllOrders(): Promise<Order[]> {
     const q = query(ordersCollection, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    const orders: Order[] = [];
-    snapshot.forEach(doc => {
-        orders.push({ id: doc.id, ...doc.data() } as Order);
-    });
-    return orders;
+    return snapshot.docs.map(processOrder);
 }

@@ -24,6 +24,11 @@ export interface Order {
     orderItems: CartItem[];
     totalAmount: number;
     status: OrderStatus;
-    createdAt: Timestamp;
+    createdAt: string; // Changed from Timestamp
     paymentProofUrl?: string; // This can now be a long Data URL string
+}
+
+// This type is used when fetching from Firestore before serialization
+export interface FirestoreOrder extends Omit<Order, 'createdAt'> {
+    createdAt: Timestamp;
 }

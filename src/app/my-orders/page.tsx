@@ -86,7 +86,7 @@ export default function MyOrdersPage() {
                    <div className="flex-1">
                      <p className="font-semibold">Order ID: <span className="font-mono text-sm text-muted-foreground">{order.id}</span></p>
                      <p className="text-sm text-muted-foreground">
-                        {format(order.createdAt.toDate(), 'PPP')}
+                        {format(new Date(order.createdAt), 'PPP')}
                      </p>
                    </div>
                 </div>
