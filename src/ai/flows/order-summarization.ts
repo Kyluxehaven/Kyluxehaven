@@ -74,7 +74,11 @@ const summarizeOrderFlow = ai.defineFlow(
     outputSchema: SummarizeOrderOutputSchema,
   },
   async input => {
-    const result = await summarizeOrderPrompt(input);
-    return result.text;
+    const response = await summarizeOrderPrompt(input);
+    const output = response.output;
+    if (!output) {
+      throw new Error("The AI model failed to return a valid summary.");
+    }
+    return output;
   }
 );
