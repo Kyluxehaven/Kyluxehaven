@@ -25,5 +25,6 @@ export async function placeOrder(cartItems: CartItem[], customerName: string, sh
     orderData: JSON.stringify(orderData),
   });
 
-  redirect(`/order/${orderId}?${params.toString()}`);
+  // Redirect to the new payment page instead of the order confirmation
+  redirect(`/payment?${params.toString()}`);
 }
