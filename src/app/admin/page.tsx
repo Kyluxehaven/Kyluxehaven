@@ -37,7 +37,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Loader2, LogOut } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -46,8 +46,12 @@ import type { Product } from "@/lib/types"
 import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { signOutUser } from "@/lib/auth";
 
-export default function AdminPage() {
+
+function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -65,6 +69,7 @@ export default function AdminPage() {
   });
 
   const { toast } = useToast();
+  const router = useRouter();
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -179,15 +184,34 @@ export default function AdminPage() {
       }
     }
   };
+  
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      router.push('/login');
+    } catch (error) {
+       toast({
+          variant: "destructive",
+          title: "Sign Out Error",
+          description: "Could not sign out. Please try again.",
+        });
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl sm:text-4xl font-headline font-bold">Product Management</h1>
-        <Button onClick={() => handleOpenForm(null)}>
-          <PlusCircle className="mr-2 h-5 w-5" />
-          Add Product
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={() => handleOpenForm(null)}>
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Add Product
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-5 w-5" />
+                Sign Out
+            </Button>
+        </div>
       </div>
 
       <Card>
@@ -334,4 +358,25 @@ export default function AdminPage() {
       </AlertDialog>
     </div>
   )
+}
+
+export default function AdminPage() {
+    const { user, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [user, loading, router]);
+
+    if (loading || !user) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            </div>
+        )
+    }
+
+    return <AdminDashboard />;
 }
