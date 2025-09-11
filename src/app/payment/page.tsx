@@ -136,6 +136,7 @@ export default function PaymentPage() {
                          <div className="relative w-full h-full">
                             <Image src={previewUrl} alt="Payment proof preview" fill className="object-contain rounded-lg" />
                              <Button
+                                type="button"
                                 variant="destructive"
                                 size="icon"
                                 className="absolute top-2 right-2 h-6 w-6 rounded-full"
@@ -164,7 +165,7 @@ export default function PaymentPage() {
 
         </CardContent>
         <CardFooter className="flex-col gap-4">
-          <Button onClick={handleConfirmation} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting}>
+          <Button type="button" onClick={handleConfirmation} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSubmitting ? 'Confirming...' : 'I Have Paid, Continue'}
           </Button>
