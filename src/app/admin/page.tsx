@@ -43,7 +43,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from "react"
 import type { Product } from "@/lib/types"
-import { getProducts, addProduct, updateProduct, deleteProduct } from "@/lib/firestore"
+import { getProducts, addProduct, updateProduct, deleteProduct, uploadImage } from "@/lib/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -143,19 +143,11 @@ export default function AdminPage() {
     
     let imageUrl = selectedProduct?.image ?? '';
 
-    if (imageFile) {
-        // In a real app, you would upload to a service like Firebase Storage.
-        // For this demo, we'll convert to a base64 Data URL.
-        const reader = new FileReader();
-        imageUrl = await new Promise((resolve) => {
-             reader.onloadend = () => {
-                resolve(reader.result as string);
-             };
-             reader.readAsDataURL(imageFile);
-        });
-    }
-
     try {
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+
       const productData = {
         ...formData,
         image: imageUrl,
@@ -163,11 +155,9 @@ export default function AdminPage() {
       };
 
       if (selectedProduct) {
-        // Edit product
         await updateProduct(selectedProduct.id, productData);
         toast({ title: "Product updated successfully!" });
       } else {
-        // Add new product
         await addProduct(productData);
         toast({ title: "Product added successfully!" });
       }
@@ -361,5 +351,3 @@ export default function AdminPage() {
     </div>
   )
 }
-
-    

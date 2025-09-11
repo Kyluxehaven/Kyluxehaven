@@ -1,5 +1,6 @@
-import { db } from './firebase';
+import { db, storage } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from './types';
 
 const productsCollection = collection(db, 'products');
@@ -116,4 +117,9 @@ export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(productDoc);
 }
 
-    
+export async function uploadImage(file: File): Promise<string> {
+    const storageRef = ref(storage, `products/${Date.now()}-${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+}
