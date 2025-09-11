@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
         hostname: 'content.josephturner.co.uk',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'foundationgift.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
