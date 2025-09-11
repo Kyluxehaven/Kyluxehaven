@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Order } from '@/lib/types';
+import { Separator } from '@/components/ui/separator';
 
 export default function OrderSummary({ orderData }: { orderData: Order }) {
   const [summary, setSummary] = useState<SummarizeOrderOutput | null>(null);
@@ -20,7 +21,8 @@ export default function OrderSummary({ orderData }: { orderData: Order }) {
           name: item.name,
           quantity: item.quantity,
           price: item.price,
-      }))
+      })),
+      totalAmount: orderData.totalAmount,
   }), [orderData]);
 
   useEffect(() => {
@@ -52,10 +54,21 @@ export default function OrderSummary({ orderData }: { orderData: Order }) {
 
   if (loading) {
     return (
-        <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
+        <div className="space-y-4">
             <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+             <Separator className="my-6" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+             <Separator className="my-6" />
+            <div className="flex justify-between font-bold text-lg">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-28" />
+            </div>
         </div>
     );
   }
@@ -67,9 +80,13 @@ export default function OrderSummary({ orderData }: { orderData: Order }) {
   const summaryParagraphs = summary.summary.split('\n').filter(p => p.trim() !== '');
 
   return (
-    <div className="space-y-4 text-sm text-muted-foreground">
-      {summaryParagraphs.map((p, i) => <p key={i}>{p}</p>)}
-      <p className="font-bold text-foreground !mt-6">Total: ₦{summary.totalAmount.toFixed(2)}</p>
+    <div className="space-y-4">
+        {summaryParagraphs.map((p, i) => <p key={i} className="text-sm text-muted-foreground">{p}</p>)}
+        <Separator className="my-6" />
+        <div className="flex justify-between font-bold text-lg">
+            <p>Total</p>
+            <p>₦{summary.totalAmount.toFixed(2)}</p>
+        </div>
     </div>
   );
 }

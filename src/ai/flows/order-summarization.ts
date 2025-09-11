@@ -25,6 +25,7 @@ const SummarizeOrderInputSchema = z.object({
   customerName: z.string().describe('The name of the customer.'),
   orderItems: z.array(OrderItemSchema).describe('An array of order items.'),
   shippingAddress: z.string().describe('The shipping address for the order.'),
+  totalAmount: z.number().describe("The total amount for the order."),
 });
 export type SummarizeOrderInput = z.infer<typeof SummarizeOrderInputSchema>;
 
@@ -50,19 +51,20 @@ const summarizeOrderPrompt = ai.definePrompt({
   The summary should include the following:
   - A greeting to the customer by name.
   - A list of all items ordered, including their name, quantity, and price in Naira.
-  - The total amount of the order, calculated correctly based on the items in the orderItems.
-  - A thank you message and an estimated delivery date.
+  - The total amount of the order, which must be exactly the provided totalAmount.
+  - A thank you message and an estimated delivery date of 3-5 business days.
 
   Here are the order details:
   Customer Name: {{{customerName}}}
   Order ID: {{{orderId}}}
   Shipping Address: {{{shippingAddress}}}
+  Total Amount: ₦{{{totalAmount}}}
   Order Items:
   {{#each orderItems}}
   - Product: {{name}}, Quantity: {{quantity}}, Price: ₦{{price}}
   {{/each}}
 
-  Now, generate the order summary:
+  Now, generate the order summary and make sure the 'totalAmount' field in the output JSON is set to the provided total amount.
   `,
 });
 
@@ -74,19 +76,7 @@ const summarizeOrderFlow = ai.defineFlow(
     outputSchema: SummarizeOrderOutputSchema,
   },
   async input => {
-    const {orderItems} = input;
-    // Calculate the total amount of the order
-    const totalAmount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    const {output} = await summarizeOrderPrompt({
-      ...input,
-    });
-
-    return {
-      ...output!,
-      totalAmount,
-    };
+    const {output} = await summarizeOrderPrompt(input);
+    return output!;
   }
 );
-
-    

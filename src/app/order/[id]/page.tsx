@@ -7,6 +7,8 @@ import { db } from '@/lib/firebase';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import OrderSummary from './order-summary';
+
 
 async function getOrderData(orderId: string): Promise<Order | null> {
     const orderRef = doc(db, 'orders', orderId);
@@ -38,48 +40,11 @@ export default async function OrderConfirmationPage({
           </div>
           <CardTitle className="text-3xl font-headline mt-4">Thank you for your order!</CardTitle>
           <CardDescription>
-            Your order has been placed successfully. A confirmation receipt has been sent to your email.
+            Your order has been placed successfully. Here is a summary of your purchase.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Order ID</span>
-              <span className="font-mono text-sm">{orderData.id}</span>
-            </div>
-             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Order Date</span>
-              <span>{format(orderData.createdAt.toDate(), 'PPP')}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Customer</span>
-              <span>{orderData.customerName}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Shipping To</span>
-              <span className="text-right">{orderData.shippingAddress}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Status</span>
-              <Badge variant={orderData.status === 'Approved' ? 'default' : 'secondary'}>{orderData.status}</Badge>
-            </div>
-          </div>
-          <Separator className="my-6" />
-          <h3 className="text-lg font-semibold mb-4">Order Items</h3>
-           <div className="space-y-3">
-              {orderData.orderItems.map(item => (
-                  <div key={item.id} className="flex justify-between items-center text-sm">
-                      <p>{item.name} <span className="text-muted-foreground"> x {item.quantity}</span></p>
-                      <p className="font-medium">₦{(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-              ))}
-           </div>
-          <Separator className="my-6" />
-           <div className="flex justify-between font-bold text-lg">
-                <p>Total</p>
-                <p>₦{orderData.totalAmount.toFixed(2)}</p>
-            </div>
-
+            <OrderSummary orderData={orderData} />
             {orderData.status === 'Pending' && (
                 <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-4">
                     <AlertCircle className="h-5 w-5 text-yellow-500"/>
@@ -90,8 +55,20 @@ export default async function OrderConfirmationPage({
                 </div>
             )}
         </CardContent>
-        <CardFooter>
-            <p className="text-xs text-muted-foreground text-center w-full">This is a demo order. Your order status will be updated by an administrator.</p>
+        <CardFooter className="flex-col gap-2">
+            <Separator className="mb-4" />
+            <div className="w-full flex justify-between items-center">
+              <span className="text-muted-foreground">Order ID</span>
+              <span className="font-mono text-sm">{orderData.id}</span>
+            </div>
+             <div className="w-full flex justify-between items-center">
+              <span className="text-muted-foreground">Order Date</span>
+              <span>{format(orderData.createdAt.toDate(), 'PPP')}</span>
+            </div>
+            <div className="w-full flex justify-between items-center">
+              <span className="text-muted-foreground">Status</span>
+              <Badge variant={orderData.status === 'Approved' ? 'default' : 'secondary'}>{orderData.status}</Badge>
+            </div>
         </CardFooter>
       </Card>
     </div>
