@@ -129,51 +129,61 @@ export default function AdminPage() {
     }
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+ const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct && !imageFile) {
-      toast({
-        variant: "destructive",
-        title: "Image required",
-        description: "Please select an image for the new product.",
-      });
-      return;
+        toast({
+            variant: "destructive",
+            title: "Image required",
+            description: "Please select an image for the new product.",
+        });
+        return;
     }
     setIsSubmitting(true);
     
     let imageUrl = selectedProduct?.image ?? '';
 
     try {
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-      }
+        if (imageFile) {
+            imageUrl = await uploadImage(imageFile);
+        }
 
-      const productData = {
-        ...formData,
-        image: imageUrl,
-        imageHint: formData.category.toLowerCase(),
-      };
-
-      if (selectedProduct) {
-        await updateProduct(selectedProduct.id, productData);
-        toast({ title: "Product updated successfully!" });
-      } else {
-        await addProduct(productData);
-        toast({ title: "Product added successfully!" });
-      }
-      fetchProducts(); // Refresh data
-      handleCloseForm();
+        if (selectedProduct) {
+            // Editing an existing product
+             const productData: Partial<Omit<Product, 'id'>> = {
+                ...formData,
+            };
+            // Only update the image if a new one was uploaded
+            if (imageFile) {
+                productData.image = imageUrl;
+            }
+            await updateProduct(selectedProduct.id, productData);
+            toast({ title: "Product updated successfully!" });
+        } else {
+            // Adding a new product
+            const productData: Omit<Product, 'id'> = {
+                ...formData,
+                image: imageUrl,
+                imageHint: formData.category.toLowerCase(),
+            };
+            await addProduct(productData);
+            toast({ title: "Product added successfully!" });
+        }
+        
+        fetchProducts(); // Refresh data
+        handleCloseForm();
     } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "An error occurred",
-        description: "Could not save the product. Please try again.",
-      });
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "An error occurred",
+            description: "Could not save the product. Please try again.",
+        });
     } finally {
-      setIsSubmitting(false);
+        setIsSubmitting(false);
     }
-  };
+};
+
 
   const openDeleteDialog = (product: Product) => {
     setProductToDelete(product);
