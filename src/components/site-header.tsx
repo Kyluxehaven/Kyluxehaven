@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { CartSheet } from './cart-sheet';
 import { useState } from 'react';
+import Logo from './logo';
 
 export default function SiteHeader() {
   const { cartCount } = useCart();
@@ -16,8 +17,8 @@ export default function SiteHeader() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-headline font-bold text-primary">
-              KyluxeHaven
+            <Link href="/">
+              <Logo />
             </Link>
           </div>
           <div className="flex items-center gap-4">
