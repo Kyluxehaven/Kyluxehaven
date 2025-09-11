@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Search, User as UserIcon, LogOut } from 'lucide-react';
+import { ShoppingCart, Search, User as UserIcon, LogOut, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/use-cart';
@@ -110,11 +110,15 @@ export default function SiteHeader() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                   <DropdownMenuItem asChild>
+                       <Link href="/my-orders"><Package className="mr-2 h-4 w-4" />My Orders</Link>
+                    </DropdownMenuItem>
                   {user.uid === 'O0dGhZynNgYa6eeZ3r5UDQvRU6h2' && (
                     <DropdownMenuItem asChild>
                        <Link href="/admin">Admin Dashboard</Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>

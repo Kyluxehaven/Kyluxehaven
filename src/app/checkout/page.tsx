@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 import { AuthDialog } from '@/components/auth-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -30,6 +31,7 @@ export default function CheckoutPage() {
   const { cartItems, cartTotal } = useCart();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
@@ -70,9 +72,20 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
     try {
-      await placeOrder(cartItems, data.name, shippingAddress);
+      await placeOrder({
+        userId: user.uid,
+        customerName: data.name,
+        shippingAddress,
+        cartItems,
+        cartTotal
+      });
     } catch (error) {
       console.error("Failed to place order:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not place your order. Please try again.'
+      })
       setIsSubmitting(false);
     }
   }
@@ -218,7 +231,7 @@ export default function CheckoutPage() {
                   </div>
                   <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSubmitting ? 'Placing Order...' : 'Place Order & Pay'}
+                    {isSubmitting ? 'Placing Order...' : 'Proceed to Payment'}
                   </Button>
                 </form>
               </Form>

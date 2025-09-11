@@ -2,13 +2,26 @@
 
 import { summarizeOrder, type SummarizeOrderInput, type SummarizeOrderOutput } from '@/ai/flows/order-summarization';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { type Order } from '@/lib/types';
 
-export default function OrderSummary({ orderData }: { orderData: SummarizeOrderInput }) {
+export default function OrderSummary({ orderData }: { orderData: Order }) {
   const [summary, setSummary] = useState<SummarizeOrderOutput | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const summarizationInput: SummarizeOrderInput = useMemo(() => ({
+      orderId: orderData.id,
+      customerName: orderData.customerName,
+      shippingAddress: orderData.shippingAddress,
+      orderItems: orderData.orderItems.map(item => ({
+          productId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+      }))
+  }), [orderData]);
 
   useEffect(() => {
     toast({
@@ -19,7 +32,7 @@ export default function OrderSummary({ orderData }: { orderData: SummarizeOrderI
     async function getSummary() {
       try {
         setLoading(true);
-        const result = await summarizeOrder(orderData);
+        const result = await summarizeOrder(summarizationInput);
         setSummary(result);
       } catch (e) {
         console.error(e);
@@ -35,7 +48,7 @@ export default function OrderSummary({ orderData }: { orderData: SummarizeOrderI
     
     getSummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderData]);
+  }, [summarizationInput]);
 
   if (loading) {
     return (
@@ -60,5 +73,3 @@ export default function OrderSummary({ orderData }: { orderData: SummarizeOrderI
     </div>
   );
 }
-
-    

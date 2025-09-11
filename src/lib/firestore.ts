@@ -1,9 +1,11 @@
 import { db, storage } from './firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import type { Product } from './types';
+import type { Product, Order, CartItem } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 const productsCollection = collection(db, 'products');
+const ordersCollection = collection(db, 'orders');
 
 const initialProducts: Omit<Product, 'id'>[] = [
     {
@@ -80,18 +82,16 @@ const initialProducts: Omit<Product, 'id'>[] = [
     },
 ];
 
+// Product Functions
 export async function getProducts(): Promise<Product[]> {
   const q = query(productsCollection, orderBy('name'));
   let snapshot = await getDocs(q);
 
   if (snapshot.empty) {
-    // Seed the database with initial products
     const seedPromises = initialProducts.map(product => {
         return addDoc(productsCollection, product);
     });
     await Promise.all(seedPromises);
-    
-    // Re-fetch after seeding
     snapshot = await getDocs(q);
   }
 
@@ -115,4 +115,51 @@ export async function updateProduct(id: string, product: Partial<Omit<Product, '
 export async function deleteProduct(id: string): Promise<void> {
   const productDoc = doc(db, 'products', id);
   await deleteDoc(productDoc);
+}
+
+
+// Order Functions
+
+export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<Order> {
+    const newOrderRef = await addDoc(ordersCollection, {
+        ...orderData,
+        status: 'Pending',
+        createdAt: serverTimestamp(),
+    });
+
+    const newOrderSnap = await getDoc(newOrderRef);
+    return { id: newOrderSnap.id, ...newOrderSnap.data() } as Order;
+}
+
+export async function uploadPaymentProof(file: File): Promise<string> {
+  const uniqueId = uuidv4();
+  const storageRef = ref(storage, `payment_proofs/${uniqueId}-${file.name}`);
+  const snapshot = await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  return downloadURL;
+}
+
+export async function updateOrder(id: string, data: Partial<Order>): Promise<void> {
+    const orderDoc = doc(db, 'orders', id);
+    await updateDoc(orderDoc, data);
+}
+
+export async function getOrdersForUser(userId: string): Promise<Order[]> {
+    const q = query(ordersCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    const orders: Order[] = [];
+    snapshot.forEach(doc => {
+        orders.push({ id: doc.id, ...doc.data() } as Order);
+    });
+    return orders;
+}
+
+export async function getAllOrders(): Promise<Order[]> {
+    const q = query(ordersCollection, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    const orders: Order[] = [];
+    snapshot.forEach(doc => {
+        orders.push({ id: doc.id, ...doc.data() } as Order);
+    });
+    return orders;
 }

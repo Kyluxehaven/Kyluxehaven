@@ -4,39 +4,39 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Banknote, User, Hash, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
+import { Banknote, User, Hash, UploadCloud, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/hooks/use-cart';
+import { confirmPayment } from '../checkout/actions';
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
   const { clearCart } = useCart();
-  const orderDataString = searchParams.get('orderData');
+  const orderId = searchParams.get('orderId');
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!orderDataString) {
+  if (!orderId) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <h1 className="text-2xl font-bold">Error</h1>
-        <p>No order data found. Please try checking out again.</p>
+        <p>No order ID found. Please try checking out again.</p>
         <Button asChild className="mt-4">
           <Link href="/checkout">Go to Checkout</Link>
         </Button>
       </div>
     );
   }
-
-  const orderData = JSON.parse(orderDataString);
-  const orderId = orderData.orderId;
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -54,7 +54,7 @@ export default function PaymentPage() {
     }
   };
   
-  const handleConfirmation = () => {
+  const handleConfirmation = async () => {
     if (!paymentProof) {
       toast({
         variant: 'destructive',
@@ -63,11 +63,28 @@ export default function PaymentPage() {
       });
       return;
     }
-    // In a real application, you would upload the `paymentProof` file here.
-    // For this demo, we'll clear the cart and proceed to the confirmation page.
-    clearCart();
-    const params = new URLSearchParams({ orderData: orderDataString });
-    router.push(`/order/${orderId}?${params.toString()}`);
+
+    setIsSubmitting(true);
+
+    try {
+        const formData = new FormData();
+        formData.append('paymentProof', paymentProof);
+        
+        await confirmPayment(orderId, formData);
+        
+        // This flow is now handled by the server action redirect
+        clearCart();
+        // router.push(`/order/${orderId}`);
+
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Upload Failed",
+            description: "Could not submit your payment proof. Please try again."
+        });
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -108,7 +125,7 @@ export default function PaymentPage() {
           <p className="text-sm text-muted-foreground text-center">
               Your order will be processed as soon as your payment is confirmed. Please use your Order ID as the payment reference if possible. Your Order ID is <span className="font-mono font-bold">{orderId}</span>.
           </p>
-          <div className="space-y-2">
+          <form ref={formRef} className="space-y-2">
             <Label htmlFor="paymentProof">Upload Proof of Payment</Label>
             <div className="flex items-center justify-center w-full">
                 <label
@@ -140,15 +157,16 @@ export default function PaymentPage() {
                             <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 5MB)</p>
                         </div>
                     )}
-                    <Input id="paymentProof" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" />
+                    <Input id="paymentProof" name="paymentProof" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif" />
                 </label>
             </div> 
-          </div>
+          </form>
 
         </CardContent>
         <CardFooter className="flex-col gap-4">
-          <Button onClick={handleConfirmation} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-            I Have Paid, Continue
+          <Button onClick={handleConfirmation} className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSubmitting ? 'Confirming...' : 'I Have Paid, Continue'}
           </Button>
           <p className="text-xs text-muted-foreground text-center w-full">By continuing, you are confirming that you have made the payment. Your order summary will be shown next.</p>
         </CardFooter>

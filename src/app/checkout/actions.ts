@@ -1,30 +1,46 @@
 "use server";
 
 import { redirect } from 'next/navigation';
-import type { CartItem } from '@/lib/types';
+import type { CartItem, Order } from '@/lib/types';
+import { createOrder, uploadPaymentProof } from '@/lib/firestore';
 
-export async function placeOrder(cartItems: CartItem[], customerName: string, shippingAddress: string) {
-  // In a real app, you would save the order to a database here.
-  // For this demo, we'll generate a random order ID and pass data via URL.
+interface OrderData {
+    userId: string;
+    customerName: string;
+    shippingAddress: string;
+    cartItems: CartItem[];
+    cartTotal: number;
+}
 
-  const orderId = Math.random().toString(36).substr(2, 9);
-
-  const orderData = {
-    orderId,
-    customerName,
-    shippingAddress,
-    orderItems: cartItems.map(item => ({
-      productId: item.id,
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-    })),
-  };
-
-  const params = new URLSearchParams({
-    orderData: JSON.stringify(orderData),
+export async function placeOrder(orderData: OrderData) {
+  // We're creating the order with a 'Pending' status here,
+  // before the payment proof is uploaded.
+  const newOrder = await createOrder({
+    userId: orderData.userId,
+    customerName: orderData.customerName,
+    shippingAddress: orderData.shippingAddress,
+    orderItems: orderData.cartItems,
+    totalAmount: orderData.cartTotal,
   });
 
-  // Redirect to the new payment page instead of the order confirmation
-  redirect(`/payment?${params.toString()}`);
+  // Redirect to the payment page with the new order's ID
+  redirect(`/payment?orderId=${newOrder.id}`);
+}
+
+export async function confirmPayment(orderId: string, formData: FormData) {
+    const proofFile = formData.get('paymentProof') as File;
+
+    if (!proofFile) {
+        throw new Error("Payment proof is required.");
+    }
+    
+    // 1. Upload proof to storage
+    const proofUrl = await uploadPaymentProof(proofFile);
+
+    // 2. Update order with proof URL
+    // We can add more fields to update here if needed in the future
+    await updateOrder(orderId, { paymentProofUrl: proofUrl });
+    
+    // 3. Redirect to order confirmation page
+    redirect(`/order/${orderId}`);
 }
