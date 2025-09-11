@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Search } from 'lucide-react';
+import { ShoppingCart, Search, User as UserIcon, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/hooks/use-cart';
@@ -9,10 +9,23 @@ import { CartSheet } from './cart-sheet';
 import { useState } from 'react';
 import Logo from './logo';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import { AuthDialog } from './auth-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function SiteHeader() {
   const { cartCount } = useCart();
+  const { user, signOutUser } = useAuth();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
@@ -22,6 +35,16 @@ export default function SiteHeader() {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    router.push('/');
+  }
+  
+  const getInitials = (email: string | null | undefined) => {
+    if (!email) return 'U';
+    return email.charAt(0).toUpperCase();
+  }
 
   return (
     <header className="bg-card shadow-sm sticky top-0 z-40">
@@ -44,12 +67,12 @@ export default function SiteHeader() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             </form>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <nav className="hidden md:flex gap-6 text-sm font-medium">
               <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
               <Link href="/shop" className="text-foreground/80 hover:text-foreground transition-colors">Shop</Link>
             </nav>
-            <div className="relative">
+             <div className="relative">
               <Button aria-label={`Open cart with ${cartCount} items`} variant="ghost" size="icon" onClick={() => setIsCartOpen(true)}>
                 <ShoppingCart className="h-5 w-5" />
               </Button>
@@ -59,10 +82,47 @@ export default function SiteHeader() {
                 </span>
               )}
             </div>
+            {user ? (
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
+                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">My Account</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {user.uid === 'O0dGhZynNgYa6eeZ3r5UDQvRU6h2' && (
+                    <DropdownMenuItem asChild>
+                       <Link href="/admin">Admin Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+                <Button onClick={() => setIsAuthDialogOpen(true)} variant="outline">
+                    Sign In
+                </Button>
+            )}
           </div>
         </div>
       </div>
       <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
+      <AuthDialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
     </header>
   );
 }

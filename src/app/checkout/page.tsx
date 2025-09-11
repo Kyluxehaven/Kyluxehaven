@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from '@/hooks/use-cart';
+import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -13,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
+import { AuthDialog } from '@/components/auth-dialog';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -26,8 +28,11 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -39,32 +44,64 @@ export default function CheckoutPage() {
       zip: '',
     },
   });
+  
+  useEffect(() => {
+    // Prefill name from user profile if available
+    if (user) {
+      form.setValue('name', user.displayName || '');
+    }
+  }, [user, form]);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      setIsAuthDialogOpen(true);
+    }
     if (cartItems.length === 0 && !isSubmitting) {
       router.push('/');
     }
-  }, [cartItems, router, isSubmitting]);
+  }, [cartItems, router, isSubmitting, authLoading, user]);
 
   async function onSubmit(data: CheckoutFormValues) {
+    if (!user) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
     try {
-      // The redirect happens inside placeOrder, so clearCart() was never called.
-      // It has been moved to the payment page.
       await placeOrder(cartItems, data.name, shippingAddress);
     } catch (error) {
-      // In a real app, you would show an error toast here
       console.error("Failed to place order:", error);
       setIsSubmitting(false);
     }
   }
 
-  if (cartItems.length === 0) {
+  if (authLoading || cartItems.length === 0) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <p>Your cart is empty. Redirecting...</p>
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
       </div>
+    );
+  }
+  
+  if (!user && !authLoading) {
+    return (
+      <>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <h1 className="text-2xl font-bold">Authentication Required</h1>
+            <p className="mt-2 text-muted-foreground">Please sign in to proceed with your order.</p>
+        </div>
+        <AuthDialog open={isAuthDialogOpen} onOpenChange={(open) => {
+            if (!open) {
+                // If the user closes the dialog without logging in, redirect them.
+                if (!user) router.push('/');
+                else setIsAuthDialogOpen(false);
+            } else {
+                setIsAuthDialogOpen(true);
+            }
+        }} />
+      </>
     );
   }
 

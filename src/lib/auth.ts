@@ -3,6 +3,7 @@
 import { auth } from './firebase';
 import { 
     signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
     type User
@@ -16,6 +17,15 @@ export const signInWithEmail = async (email: string, password: string): Promise<
         // Firebase provides descriptive error messages that are safe to show to the user.
         // e.g., "auth/user-not-found", "auth/wrong-password"
         throw new Error(error.message || "An unknown authentication error occurred.");
+    }
+};
+
+export const signUpWithEmail = async (email: string, password: string): Promise<User> => {
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        return userCredential.user;
+    } catch (error: any) {
+        throw new Error(error.message || "An unknown error occurred during sign-up.");
     }
 };
 
