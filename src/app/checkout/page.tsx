@@ -87,14 +87,14 @@ export default function CheckoutPage() {
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-medium">₦{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
               <div className="border-t my-4"></div>
               <div className="flex justify-between font-bold text-lg">
                 <p>Total</p>
-                <p>${cartTotal.toFixed(2)}</p>
+                <p>₦{cartTotal.toFixed(2)}</p>
               </div>
             </CardContent>
           </Card>
@@ -174,3 +174,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

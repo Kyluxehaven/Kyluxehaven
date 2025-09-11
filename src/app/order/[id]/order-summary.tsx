@@ -56,7 +56,9 @@ export default function OrderSummary({ orderData }: { orderData: SummarizeOrderI
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
       {summaryParagraphs.map((p, i) => <p key={i}>{p}</p>)}
-      <p className="font-bold text-foreground !mt-6">Total: ${summary.totalAmount.toFixed(2)}</p>
+      <p className="font-bold text-foreground !mt-6">Total: ₦{summary.totalAmount.toFixed(2)}</p>
     </div>
   );
 }
+
+    

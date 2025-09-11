@@ -8,7 +8,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Classic Wristband',
       description: 'A stylish and comfortable wristband for everyday wear.',
-      price: 15.99,
+      price: 24000,
       image: 'https://picsum.photos/seed/wristband/400/400',
       imageHint: 'wristband fashion',
       category: 'Wristband',
@@ -16,7 +16,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Elegant Timepiece',
       description: 'A sophisticated wristwatch that complements any outfit.',
-      price: 120.5,
+      price: 180750,
       image: 'https://picsum.photos/seed/wristwatch/400/400',
       imageHint: 'wristwatch elegant',
       category: 'Wristwatch',
@@ -24,7 +24,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Silver Charm Bracelet',
       description: 'A beautiful silver bracelet with delicate charms.',
-      price: 45.0,
+      price: 67500,
       image: 'https://picsum.photos/seed/bracelet/400/400',
       imageHint: 'bracelet jewelry',
       category: 'Bracelet',
@@ -32,7 +32,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Minimalist Leather Wallet',
       description: 'A sleek wallet made from genuine leather.',
-      price: 35.0,
+      price: 52500,
       image: 'https://picsum.photos/seed/wallet/400/400',
       imageHint: 'leather wallet',
       category: 'Wallet',
@@ -40,7 +40,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Classic Leather Belt',
       description: 'A durable and timeless leather belt.',
-      price: 25.0,
+      price: 37500,
       image: 'https://picsum.photos/seed/belt/400/400',
       imageHint: 'leather belt',
       category: 'Belt',
@@ -48,7 +48,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Urban Explorer Cap',
       description: 'A trendy cap for your urban adventures.',
-      price: 22.99,
+      price: 34500,
       image: 'https://picsum.photos/seed/cap/400/400',
       imageHint: 'fashion cap',
       category: 'Cap',
@@ -56,7 +56,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Diamond Stud Earrings',
       description: 'A pair of sparkling diamond stud earrings.',
-      price: 250.0,
+      price: 375000,
       image: 'https://picsum.photos/seed/earring/400/400',
       imageHint: 'earrings jewelry',
       category: 'Earring',
@@ -64,7 +64,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Shimmering Lip Gloss',
       description: 'A high-shine lip gloss for a luscious look.',
-      price: 12.0,
+      price: 18000,
       image: 'https://picsum.photos/seed/lipgloss/400/400',
       imageHint: 'lip gloss',
       category: 'Lip glosses',
@@ -72,7 +72,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
     {
       name: 'Nourishing Hand Cream',
       description: 'A rich and moisturizing hand cream with a pleasant scent.',
-      price: 8.5,
+      price: 12750,
       image: 'https://picsum.photos/seed/handcream/400/400',
       imageHint: 'hand cream',
       category: 'Hand cream',
@@ -115,3 +115,5 @@ export async function deleteProduct(id: string): Promise<void> {
   const productDoc = doc(db, 'products', id);
   await deleteDoc(productDoc);
 }
+
+    

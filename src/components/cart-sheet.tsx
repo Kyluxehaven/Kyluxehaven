@@ -40,7 +40,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">${item.price.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">₦{item.price.toFixed(2)}</p>
                       <div className="mt-2 flex items-center gap-2">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                           <Minus className="h-4 w-4" />
@@ -69,7 +69,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
               <div className="flex w-full flex-col gap-4">
                 <div className="flex justify-between font-semibold">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>₦{cartTotal.toFixed(2)}</span>
                 </div>
                 <SheetClose asChild>
                   <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
@@ -94,3 +94,5 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
     </Sheet>
   );
 }
+
+    

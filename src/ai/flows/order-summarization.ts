@@ -46,9 +46,10 @@ const summarizeOrderPrompt = ai.definePrompt({
   output: {schema: SummarizeOrderOutputSchema},
   prompt: `You are an order summarization expert for KyluxeHaven, an e-commerce website.
   Your task is to generate a clear, concise, and accurate summary of a customer's order.
+  The currency is Nigerian Naira (₦).
   The summary should include the following:
   - A greeting to the customer by name.
-  - A list of all items ordered, including their name, quantity, and price.
+  - A list of all items ordered, including their name, quantity, and price in Naira.
   - The total amount of the order, calculated correctly based on the items in the orderItems.
   - A thank you message and an estimated delivery date.
 
@@ -58,7 +59,7 @@ const summarizeOrderPrompt = ai.definePrompt({
   Shipping Address: {{{shippingAddress}}}
   Order Items:
   {{#each orderItems}}
-  - Product: {{name}}, Quantity: {{quantity}}, Price: ${{price}}
+  - Product: {{name}}, Quantity: {{quantity}}, Price: ₦{{price}}
   {{/each}}
 
   Now, generate the order summary:
@@ -88,3 +89,4 @@ const summarizeOrderFlow = ai.defineFlow(
   }
 );
 
+    

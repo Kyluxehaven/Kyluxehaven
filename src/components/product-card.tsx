@@ -43,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <CardDescription className="mt-1 text-sm line-clamp-2">{product.description}</CardDescription>
       </CardContent>
       <CardFooter className="p-4 flex justify-between items-center bg-secondary/30">
-        <p className="text-lg font-bold text-primary">${product.price.toFixed(2)}</p>
+        <p className="text-lg font-bold text-primary">₦{product.price.toFixed(2)}</p>
         <Button onClick={handleAddToCart} className="bg-accent text-accent-foreground hover:bg-accent/90">
           <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
         </Button>
@@ -51,3 +51,5 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
+
+    
