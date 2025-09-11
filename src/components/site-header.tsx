@@ -41,9 +41,17 @@ export default function SiteHeader() {
     router.push('/');
   }
   
-  const getInitials = (email: string | null | undefined) => {
-    if (!email) return 'U';
-    return email.charAt(0).toUpperCase();
+  const getInitials = (nameOrEmail: string | null | undefined) => {
+    if (!nameOrEmail) return 'U';
+    
+    // If it's a name with spaces, get initials from first/last
+    const nameParts = nameOrEmail.split(' ');
+    if (nameParts.length > 1 && nameParts[0] && nameParts[1]) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+    }
+    
+    // Otherwise, just use the first letter
+    return nameOrEmail.charAt(0).toUpperCase();
   }
 
   return (
@@ -88,14 +96,14 @@ export default function SiteHeader() {
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
-                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                      <AvatarFallback>{getInitials(user.displayName ?? user.email)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">My Account</p>
+                      <p className="text-sm font-medium leading-none">{user.displayName ?? 'My Account'}</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user.email}
                       </p>

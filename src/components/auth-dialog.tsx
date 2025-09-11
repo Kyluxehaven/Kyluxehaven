@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Lock, Mail, Loader2, Phone } from 'lucide-react';
+import { Lock, Mail, Loader2, Phone, User as UserIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { signInWithEmail, signUpWithEmail } from '@/lib/auth';
 
 const signUpSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters.'),
   email: z.string().email('Please enter a valid email address.'),
   phone: z.string().min(10, 'Please enter a valid phone number'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
@@ -38,7 +39,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   
   const signUpForm = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: '', phone: '', password: '' },
+    defaultValues: { fullName: '', email: '', phone: '', password: '' },
   });
 
   const signInForm = useForm<SignInFormValues>({
@@ -49,7 +50,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   async function onSignUpSubmit(data: SignUpFormValues) {
     setIsSubmitting(true);
     try {
-      await signUpWithEmail(data.email, data.password);
+      await signUpWithEmail(data.email, data.password, data.fullName);
       toast({ title: 'Account Created!', description: "You have successfully signed up." });
       onOpenChange(false);
     } catch (error: any) {
@@ -131,6 +132,18 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             <TabsContent value="signup">
                 <Form {...signUpForm}>
                     <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4 pt-4">
+                        <FormField control={signUpForm.control} name="fullName" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl>
+                                    <div className="relative">
+                                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input placeholder="John Doe" {...field} className="pl-10" />
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
                         <FormField control={signUpForm.control} name="email" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
