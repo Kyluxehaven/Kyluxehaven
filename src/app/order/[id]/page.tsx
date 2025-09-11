@@ -1,4 +1,4 @@
-import { type Order, type FirestoreOrder } from '@/lib/types';
+import { type Order, type FirestoreOrder, type CartItem } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import OrderSummary from './order-summary';
+import Image from 'next/image';
 
 
 async function getOrderData(orderId: string): Promise<Order | null> {
@@ -50,7 +50,27 @@ export default async function OrderConfirmationPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <OrderSummary orderData={orderData} />
+            <div className="space-y-4">
+              {orderData.orderItems.map((item: CartItem) => (
+                <div key={item.id} className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 rounded-md overflow-hidden border">
+                      <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-muted-foreground">Qty: {item.quantity}</p>
+                    </div>
+                  </div>
+                  <p className="font-medium">₦{(item.price * item.quantity).toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
+            <Separator className="my-6" />
+            <div className="flex justify-between font-bold text-lg">
+                <p>Total</p>
+                <p>₦{orderData.totalAmount.toFixed(2)}</p>
+            </div>
             {orderData.status === 'Pending' && (
                 <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-4">
                     <AlertCircle className="h-5 w-5 text-yellow-500"/>
