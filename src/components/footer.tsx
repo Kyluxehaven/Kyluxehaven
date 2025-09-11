@@ -23,7 +23,7 @@ export default function Footer() {
             <div>
               <h3 className="font-semibold tracking-wider uppercase">Support</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link href="#" className="text-sm hover:underline">Contact Us</Link></li>
+                <li><Link href="/contact" className="text-sm hover:underline">Contact Us</Link></li>
                 <li><Link href="#" className="text-sm hover:underline">FAQ</Link></li>
                 <li><Link href="#" className="text-sm hover:underline">Shipping & Returns</Link></li>
               </ul>
