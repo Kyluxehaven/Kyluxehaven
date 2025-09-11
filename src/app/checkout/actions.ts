@@ -2,14 +2,23 @@
 "use server";
 
 import { redirect } from 'next/navigation';
-import type { CartItem, Order } from '@/lib/types';
+import type { Order } from '@/lib/types';
 import { createOrder, uploadPaymentProof, updateOrder } from '@/lib/firestore';
+
+// Simplified item structure for the action
+interface SimpleCartItem {
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+    image: string;
+}
 
 interface OrderData {
     userId: string;
     customerName: string;
     shippingAddress: string;
-    cartItems: CartItem[];
+    cartItems: SimpleCartItem[];
     cartTotal: number;
 }
 
@@ -19,7 +28,7 @@ export async function placeOrder(orderData: OrderData) {
       userId: orderData.userId,
       customerName: orderData.customerName,
       shippingAddress: orderData.shippingAddress,
-      orderItems: orderData.cartItems,
+      orderItems: orderData.cartItems, // This now expects SimpleCartItem[]
       totalAmount: orderData.cartTotal,
     });
     // This redirect must happen outside of a try...catch that returns a value.

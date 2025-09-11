@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from '@/hooks/use-cart';
@@ -71,12 +72,22 @@ export default function CheckoutPage() {
 
     setIsSubmitting(true);
     const shippingAddress = `${data.address}, ${data.city}, ${data.zip}`;
+    
+    // Simplify cart items for the server action
+    const simpleCartItems = cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+    }));
+
     try {
       const result = await placeOrder({
         userId: user.uid,
         customerName: data.name,
         shippingAddress,
-        cartItems,
+        cartItems: simpleCartItems,
         cartTotal
       });
       if (result?.error) {
