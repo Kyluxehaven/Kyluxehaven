@@ -1,6 +1,6 @@
 "use client";
 
-import { summarizeOrder, type SummarizeOrderInput, type SummarizeOrderOutput } from '@/ai/flows/order-summarization';
+import { summarizeOrder, type SummarizeOrderInput } from '@/ai/flows/order-summarization';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,7 +8,7 @@ import { type Order } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 
 export default function OrderSummary({ orderData }: { orderData: Order }) {
-  const [summary, setSummary] = useState<SummarizeOrderOutput | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -77,7 +77,7 @@ export default function OrderSummary({ orderData }: { orderData: Order }) {
     return <p className="text-destructive">Failed to load order summary.</p>;
   }
 
-  const summaryParagraphs = summary.summary.split('\n').filter(p => p.trim() !== '');
+  const summaryParagraphs = summary.split('\n').filter(p => p.trim() !== '');
 
   return (
     <div className="space-y-4">
@@ -85,7 +85,7 @@ export default function OrderSummary({ orderData }: { orderData: Order }) {
         <Separator className="my-6" />
         <div className="flex justify-between font-bold text-lg">
             <p>Total</p>
-            <p>₦{summary.totalAmount.toFixed(2)}</p>
+            <p>₦{orderData.totalAmount.toFixed(2)}</p>
         </div>
     </div>
   );

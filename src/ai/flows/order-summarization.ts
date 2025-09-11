@@ -30,11 +30,9 @@ const SummarizeOrderInputSchema = z.object({
 export type SummarizeOrderInput = z.infer<typeof SummarizeOrderInputSchema>;
 
 // Define the output schema for the order summarization flow
-const SummarizeOrderOutputSchema = z.object({
-  summary: z.string().describe('A detailed summary of the order.'),
-  totalAmount: z.number().describe('The total cost amount with applied discounts, shipping etc.'),
-});
+const SummarizeOrderOutputSchema = z.string().describe('A detailed summary of the order.');
 export type SummarizeOrderOutput = z.infer<typeof SummarizeOrderOutputSchema>;
+
 
 // Exported function to summarize the order
 export async function summarizeOrder(input: SummarizeOrderInput): Promise<SummarizeOrderOutput> {
@@ -44,14 +42,13 @@ export async function summarizeOrder(input: SummarizeOrderInput): Promise<Summar
 const summarizeOrderPrompt = ai.definePrompt({
   name: 'summarizeOrderPrompt',
   input: {schema: SummarizeOrderInputSchema},
-  output: {schema: SummarizeOrderOutputSchema},
   prompt: `You are an order summarization expert for KyluxeHaven, an e-commerce website.
   Your task is to generate a clear, concise, and accurate summary of a customer's order.
   The currency is Nigerian Naira (₦).
   The summary should include the following:
   - A greeting to the customer by name.
   - A list of all items ordered, including their name, quantity, and price in Naira.
-  - The total amount of the order, which must be exactly the provided totalAmount.
+  - The total amount of the order.
   - A thank you message and an estimated delivery date of 3-5 business days.
 
   Here are the order details:
@@ -64,7 +61,7 @@ const summarizeOrderPrompt = ai.definePrompt({
   - Product: {{name}}, Quantity: {{quantity}}, Price: ₦{{price}}
   {{/each}}
 
-  Now, generate the order summary and make sure the 'totalAmount' field in the output JSON is set to the provided total amount.
+  Now, generate the order summary as a single block of text.
   `,
 });
 
@@ -76,7 +73,7 @@ const summarizeOrderFlow = ai.defineFlow(
     outputSchema: SummarizeOrderOutputSchema,
   },
   async input => {
-    const {output} = await summarizeOrderPrompt(input);
-    return output!;
+    const {text} = await summarizeOrderPrompt(input);
+    return text;
   }
 );
