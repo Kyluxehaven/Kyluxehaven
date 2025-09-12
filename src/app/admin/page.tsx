@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -14,9 +15,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -46,7 +44,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState, useEffect } from "react"
 import type { Order, OrderStatus, Product } from "@/lib/types"
-import { getProducts, addProduct, updateProduct, deleteProduct, getAllOrders, updateOrder, deleteOrder } from "@/lib/firestore"
+import { getProducts, getAllOrders } from "@/lib/firestore"
+import { addProduct, updateProduct, deleteProduct, updateOrder, deleteOrder } from "./actions"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/hooks/use-auth";

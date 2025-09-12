@@ -25,12 +25,14 @@ export async function placeOrder(orderData: OrderData) {
     });
     
     revalidatePath('/');
+    revalidatePath('/my-orders');
     redirect(`/payment?orderId=${newOrder.id}`);
 
   } catch (error: any) {
     if (error.digest?.startsWith('NEXT_REDIRECT')) {
       throw error;
     }
+    console.error("placeOrder error:", error);
     return {
       error: 'There was a problem creating your order. Please try again.',
     };
@@ -58,6 +60,8 @@ export async function confirmPayment(orderId: string, formData: FormData) {
         await updateOrder(orderId, { paymentProofUrl: proofUrl });
         
         revalidatePath('/');
+        revalidatePath('/my-orders');
+        revalidatePath(`/order/${orderId}`);
         redirect(`/order/${orderId}`);
 
     } catch (error: any) {
