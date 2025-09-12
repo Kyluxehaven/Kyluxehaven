@@ -4,7 +4,8 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { deleteOrder, getOrdersForUser } from "@/lib/firestore";
+import { getOrdersForUser } from "@/lib/firestore";
+import { deleteOrder } from "@/app/admin/actions";
 import type { Order } from "@/lib/types";
 import { Loader2, Package, MoreHorizontal, Trash2 } from "lucide-react";
 import {
@@ -211,7 +212,7 @@ export default function MyOrdersPage() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
             This action cannot be undone. This will permanently delete this order from your history.
-            </AlertDialogDescription>
+            </かいldDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

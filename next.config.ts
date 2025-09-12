@@ -21,11 +21,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  experimental: {
-    // This is a security measure to prevent CSRF attacks.
-    // It is required for production builds.
-    allowedReorigins: ["*"],
-  },
 };
 
 export default nextConfig;
