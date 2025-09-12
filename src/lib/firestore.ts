@@ -85,6 +85,7 @@ const initialProducts: Omit<Product, 'id'>[] = [
 // Product Functions
 export async function getProducts(): Promise<Product[]> {
   const q = query(productsCollection, orderBy('name'));
+  // Use { cache: 'no-store' } to disable caching and ensure fresh data
   let snapshot = await getDocs(q);
 
   if (snapshot.empty) {
@@ -107,6 +108,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<string> 
   revalidatePath('/');
   revalidatePath('/shop');
   revalidatePath('/search');
+  revalidatePath('/admin');
   return docRef.id;
 }
 
@@ -116,6 +118,7 @@ export async function updateProduct(id: string, product: Partial<Omit<Product, '
   revalidatePath('/');
   revalidatePath('/shop');
   revalidatePath('/search');
+  revalidatePath('/admin');
 }
 
 export async function deleteProduct(id: string): Promise<void> {
@@ -124,6 +127,7 @@ export async function deleteProduct(id: string): Promise<void> {
   revalidatePath('/');
   revalidatePath('/shop');
   revalidatePath('/search');
+  revalidatePath('/admin');
 }
 
 
@@ -142,7 +146,8 @@ export async function createOrder(orderData: OrderInput): Promise<FirestoreOrder
         status: 'Pending',
         createdAt: serverTimestamp(),
     });
-    revalidatePath('/');
+    revalidatePath('/admin');
+    revalidatePath('/my-orders');
     const newOrderSnap = await getDoc(newOrderRef);
     return { id: newOrderSnap.id, ...newOrderSnap.data() } as FirestoreOrder;
 }
@@ -156,11 +161,16 @@ export async function uploadPaymentProof(proofAsDataUrl: string): Promise<string
 export async function updateOrder(id: string, data: Partial<Order>): Promise<void> {
     const orderDoc = doc(db, 'orders', id);
     await updateDoc(orderDoc, data);
+    revalidatePath('/admin');
+    revalidatePath('/my-orders');
+    revalidatePath(`/order/${id}`);
 }
 
 export async function deleteOrder(id: string): Promise<void> {
   const orderDoc = doc(db, 'orders', id);
   await deleteDoc(orderDoc);
+  revalidatePath('/admin');
+  revalidatePath('/my-orders');
 }
 
 function processOrder(doc: any): Order {

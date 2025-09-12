@@ -46,6 +46,8 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 
+export const revalidate = 0;
+
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
