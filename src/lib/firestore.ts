@@ -1,3 +1,4 @@
+
 import { db, storage } from './firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, serverTimestamp, getDoc, Timestamp } from 'firebase/firestore';
 import type { Product, Order, OrderItem, FirestoreOrder } from './types';
