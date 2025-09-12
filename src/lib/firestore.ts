@@ -105,6 +105,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<string> 
   const docRef = await addDoc(productsCollection, product);
   revalidatePath('/');
   revalidatePath('/shop');
+  revalidatePath('/search');
   return docRef.id;
 }
 
@@ -113,6 +114,7 @@ export async function updateProduct(id: string, product: Partial<Omit<Product, '
   await updateDoc(productDoc, product);
   revalidatePath('/');
   revalidatePath('/shop');
+  revalidatePath('/search');
 }
 
 export async function deleteProduct(id: string): Promise<void> {
@@ -120,6 +122,7 @@ export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(productDoc);
   revalidatePath('/');
   revalidatePath('/shop');
+  revalidatePath('/search');
 }
 
 
@@ -138,7 +141,7 @@ export async function createOrder(orderData: OrderInput): Promise<FirestoreOrder
         status: 'Pending',
         createdAt: serverTimestamp(),
     });
-
+    revalidatePath('/');
     const newOrderSnap = await getDoc(newOrderRef);
     return { id: newOrderSnap.id, ...newOrderSnap.data() } as FirestoreOrder;
 }
