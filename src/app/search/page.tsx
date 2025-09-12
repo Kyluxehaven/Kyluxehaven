@@ -3,6 +3,8 @@ import ProductCard from '@/components/product-card';
 import type { Product } from '@/lib/types';
 import { SearchX } from 'lucide-react';
 
+export const revalidate = 0;
+
 export default async function SearchPage({
   searchParams,
 }: {

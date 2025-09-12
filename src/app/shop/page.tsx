@@ -2,6 +2,8 @@ import { getProducts } from '@/lib/firestore';
 import ProductCard from '@/components/product-card';
 import { Product } from '@/lib/types';
 
+export const revalidate = 0;
+
 export default async function ShopPage() {
   const products: Product[] = await getProducts();
 

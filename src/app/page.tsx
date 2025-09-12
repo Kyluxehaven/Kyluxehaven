@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Product } from '@/lib/types';
 import { Gem, Truck, ShieldCheck } from 'lucide-react';
 
+export const revalidate = 0;
+
 export default async function Home() {
   const products: Product[] = await getProducts();
   const featuredProducts = products.slice(0, 3);

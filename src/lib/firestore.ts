@@ -85,7 +85,6 @@ const initialProducts: Omit<Product, 'id'>[] = [
 // Product Functions
 export async function getProducts(): Promise<Product[]> {
   const q = query(productsCollection, orderBy('name'));
-  // Use { cache: 'no-store' } to disable caching and ensure fresh data
   let snapshot = await getDocs(q);
 
   if (snapshot.empty) {
