@@ -212,7 +212,7 @@ export default function MyOrdersPage() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
             This action cannot be undone. This will permanently delete this order from your history.
-            </かいldDescription>
+            </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
