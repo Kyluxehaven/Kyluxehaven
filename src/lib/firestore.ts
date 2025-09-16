@@ -145,8 +145,7 @@ export async function getOrdersForUser(userId: string): Promise<Order[]> {
     const q = query(
       ordersCollection, 
       where('userId', '==', userId), 
-      where('isArchived', '!=', true),
-      orderBy('isArchived'),
+      where('isArchived', '==', false),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await getDocs(q);
