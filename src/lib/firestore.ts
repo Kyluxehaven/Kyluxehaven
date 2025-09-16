@@ -145,11 +145,12 @@ export async function getOrdersForUser(userId: string): Promise<Order[]> {
     const q = query(
       ordersCollection, 
       where('userId', '==', userId), 
-      where('isArchived', '==', false),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(processOrder);
+    const allUserOrders = snapshot.docs.map(processOrder);
+    // Filter out archived orders in the application code
+    return allUserOrders.filter(order => !order.isArchived);
 }
 
 export async function getAllOrders(): Promise<Order[]> {
