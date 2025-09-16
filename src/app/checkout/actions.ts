@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { createOrder, uploadPaymentProof, updateOrder } from '@/lib/firestore';
 import type { OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
-import { sendTelegramNotification } from '@/lib/telegram';
+import { sendTelegramNotification, sendPaymentProofNotification } from '@/lib/telegram';
 
 interface OrderData {
     userId: string;
@@ -61,6 +61,10 @@ export async function confirmPayment(orderId: string, formData: FormData) {
     
     try {
         const proofDataUrl = await fileToDataUrl(proofFile);
+        
+        // Send payment proof to Telegram in the background
+        await sendPaymentProofNotification(orderId, proofDataUrl);
+
         const proofUrl = await uploadPaymentProof(proofDataUrl);
         await updateOrder(orderId, { paymentProofUrl: proofUrl });
         
