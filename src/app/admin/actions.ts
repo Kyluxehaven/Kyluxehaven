@@ -41,7 +41,13 @@ export async function updateOrder(id: string, data: Partial<Order>): Promise<voi
     revalidatePath(`/order/${id}`);
 }
 
-export async function deleteOrder(id: string): Promise<void> {
+export async function archiveOrder(id: string, isArchived: boolean): Promise<void> {
+  const orderDoc = doc(db, 'orders', id);
+  await updateDoc(orderDoc, { isArchived });
+  revalidatePath('/admin');
+}
+
+export async function permanentlyDeleteOrder(id: string): Promise<void> {
   const orderDoc = doc(db, 'orders', id);
   await deleteDoc(orderDoc);
   revalidatePath('/admin');

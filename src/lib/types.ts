@@ -35,6 +35,7 @@ export interface Order {
     status: OrderStatus;
     createdAt: string; // Changed from Timestamp
     paymentProofUrl?: string; // This can now be a long Data URL string
+    isArchived?: boolean;
 }
 
 // This type is used when fetching from Firestore before serialization

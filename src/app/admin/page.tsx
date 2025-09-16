@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -37,21 +38,22 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MoreHorizontal, PlusCircle, Loader2, LogOut, ShieldAlert, Package, ShoppingCart, Check, ChevronsUpDown, Eye, Trash2 } from "lucide-react"
+import { MoreHorizontal, PlusCircle, Loader2, LogOut, ShieldAlert, Package, ShoppingCart, Check, ChevronsUpDown, Eye, Trash2, Archive, ArchiveRestore, ArchiveX } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import type { Order, OrderStatus, Product } from "@/lib/types"
 import { getProducts, getAllOrders } from "@/lib/firestore"
-import { addProduct, updateProduct, deleteProduct, updateOrder, deleteOrder } from "./actions"
+import { addProduct, updateProduct, deleteProduct, updateOrder, permanentlyDeleteOrder, archiveOrder } from "./actions"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { signOutUser } from "@/lib/auth";
 import { format } from "date-fns"
+import { Switch } from "@/components/ui/switch"
 
 
 function AdminDashboard() {
@@ -385,6 +387,7 @@ function OrdersTab() {
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+    const [showArchived, setShowArchived] = useState(false);
     const { toast } = useToast();
 
     const fetchOrders = async () => {
@@ -403,6 +406,10 @@ function OrdersTab() {
             setIsLoading(false);
         }
     };
+    
+    const filteredOrders = useMemo(() => {
+        return orders.filter(order => showArchived ? order.isArchived : !order.isArchived);
+    }, [orders, showArchived]);
 
     useEffect(() => {
         fetchOrders();
@@ -434,8 +441,8 @@ function OrdersTab() {
     const handleDeleteConfirm = async () => {
         if (orderToDelete) {
             try {
-                await deleteOrder(orderToDelete.id);
-                toast({ title: "Order deleted successfully" });
+                await permanentlyDeleteOrder(orderToDelete.id);
+                toast({ title: "Order permanently deleted" });
                 fetchOrders();
             } catch (error) {
                 toast({
@@ -447,6 +454,21 @@ function OrdersTab() {
                 setIsDeleteDialogOpen(false);
                 setOrderToDelete(null);
             }
+        }
+    };
+    
+    const handleArchiveToggle = async (order: Order) => {
+        const newArchivedState = !order.isArchived;
+        try {
+            await archiveOrder(order.id, newArchivedState);
+            toast({ title: newArchivedState ? "Order archived" : "Order restored" });
+            fetchOrders();
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not update the order's archive status.",
+            });
         }
     };
 
@@ -465,7 +487,17 @@ function OrdersTab() {
         <>
             <Card className="mt-6">
                 <CardHeader>
-                    <CardTitle>Order Management</CardTitle>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>Order Management</CardTitle>
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id="show-archived"
+                                checked={showArchived}
+                                onCheckedChange={setShowArchived}
+                            />
+                            <Label htmlFor="show-archived">Show Archived</Label>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
@@ -492,8 +524,8 @@ function OrdersTab() {
                                         <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full"/></TableCell>
                                     </TableRow>
                                 ))
-                            ) : orders.map((order) => (
-                                <TableRow key={order.id}>
+                            ) : filteredOrders.map((order) => (
+                                <TableRow key={order.id} className={order.isArchived ? 'bg-muted/50' : ''}>
                                     <TableCell className="font-mono text-xs">{order.id}</TableCell>
                                     <TableCell>{order.customerName}</TableCell>
                                     <TableCell>{format(new Date(order.createdAt), 'P')}</TableCell>
@@ -540,11 +572,20 @@ function OrdersTab() {
                                                         </a>
                                                     </DropdownMenuItem>
                                                 )}
+                                                 <DropdownMenuItem onClick={() => handleArchiveToggle(order)}>
+                                                    {order.isArchived ? (
+                                                        <ArchiveRestore className="mr-2 h-4 w-4" />
+                                                    ) : (
+                                                        <Archive className="mr-2 h-4 w-4" />
+                                                    )}
+                                                    {order.isArchived ? 'Restore' : 'Archive'}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
                                                 <DropdownMenuItem
-                                                className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
-                                                onClick={() => openDeleteDialog(order)}
+                                                    className="text-destructive focus:text-destructive-foreground focus:bg-destructive"
+                                                    onClick={() => openDeleteDialog(order)}
                                                 >
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Order
+                                                    <ArchiveX className="mr-2 h-4 w-4" /> Delete Permanently
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -559,14 +600,14 @@ function OrdersTab() {
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the order from the database.
+                    This action cannot be undone. This will permanently delete the order from the database for both you and the user.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                    <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete Permanently</AlertDialogAction>
                 </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

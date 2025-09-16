@@ -115,6 +115,7 @@ export async function createOrder(orderData: OrderInput): Promise<FirestoreOrder
         ...orderData,
         status: 'Pending',
         createdAt: serverTimestamp(),
+        isArchived: false,
     });
     const newOrderSnap = await getDoc(newOrderRef);
     return { id: newOrderSnap.id, ...newOrderSnap.data() } as FirestoreOrder;
@@ -141,7 +142,13 @@ function processOrder(doc: any): Order {
 }
 
 export async function getOrdersForUser(userId: string): Promise<Order[]> {
-    const q = query(ordersCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const q = query(
+      ordersCollection, 
+      where('userId', '==', userId), 
+      where('isArchived', '!=', true),
+      orderBy('isArchived'),
+      orderBy('createdAt', 'desc')
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(processOrder);
 }

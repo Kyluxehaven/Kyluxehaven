@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getOrdersForUser } from "@/lib/firestore";
-import { deleteOrder } from "@/app/admin/actions";
+import { permanentlyDeleteOrder } from "@/app/admin/actions";
 import type { Order } from "@/lib/types";
 import { Loader2, Package, MoreHorizontal, Trash2 } from "lucide-react";
 import {
@@ -46,6 +46,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
+
+export const revalidate = 0;
 
 export default function MyOrdersPage() {
   const { user, loading: authLoading } = useAuth();
@@ -93,7 +95,7 @@ export default function MyOrdersPage() {
     if (orderToDelete) {
         setIsLoading(true);
       try {
-        await deleteOrder(orderToDelete.id);
+        await permanentlyDeleteOrder(orderToDelete.id);
         toast({ title: "Order deleted successfully" });
         const updatedOrders = orders.filter(o => o.id !== orderToDelete.id);
         setOrders(updatedOrders);
