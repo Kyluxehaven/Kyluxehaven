@@ -87,6 +87,7 @@ export default function CheckoutPage() {
             userId: user.uid,
             customerName: data.name,
             shippingAddress,
+            phone: data.phone,
             cartItems: simpleCartItems,
             cartTotal
         });

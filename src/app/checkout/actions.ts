@@ -5,17 +5,22 @@ import { redirect } from 'next/navigation';
 import { createOrder, uploadPaymentProof, updateOrder } from '@/lib/firestore';
 import type { OrderItem } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import { sendTelegramNotification } from '@/lib/telegram';
 
 interface OrderData {
     userId: string;
     customerName: string;
     shippingAddress: string;
+    phone: string;
     cartItems: OrderItem[];
     cartTotal: number;
 }
 
 export async function placeOrder(orderData: OrderData) {
   try {
+    // Send notification to Telegram first
+    await sendTelegramNotification(orderData);
+
     const newOrder = await createOrder({
       userId: orderData.userId,
       customerName: orderData.customerName,
